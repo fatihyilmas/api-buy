@@ -17,11 +17,12 @@ module.exports = async (req, res) => {
     }
 
     try {
-        const response = await axios.post('https://api.nowpayments.io/v1/payment', {
+        const response = await axios.post('https://api.nowpayments.io/v1/invoice', {
             price_amount: amount,
             price_currency: 'usd',
-            pay_currency: currency,
-            order_description: `Donation of ${amount} USD. From: ${email || 'Anonymous'}. Message: ${message || 'None'}`
+            order_description: `Donation of ${amount} USD. From: ${email || 'Anonymous'}. Message: ${message || 'None'}`,
+            // You can specify a success URL if you have a thank you page
+            // success_url: 'https://yourdomain.com/thank-you', 
         }, {
             headers: {
                 'x-api-key': NOWPAYMENTS_API_KEY,
@@ -29,14 +30,16 @@ module.exports = async (req, res) => {
             }
         });
 
-        if (response.data && response.data.payment_url) {
-            res.status(200).json({ payment_url: response.data.payment_url });
+        // The invoice endpoint returns an invoice_url
+        if (response.data && response.data.invoice_url) {
+            // We still return it as payment_url to match the frontend script
+            res.status(200).json({ payment_url: response.data.invoice_url });
         } else {
-            console.error('NOWPAYMENTS_RESPONSE_ERROR:', response.data);
-            res.status(500).json({ message: 'Failed to get payment URL from NowPayments.' });
+            console.error('NOWPAYMENTS_INVOICE_ERROR:', response.data);
+            res.status(500).json({ message: 'Failed to get invoice URL from NowPayments.' });
         }
     } catch (error) {
-        console.error('AXIOS_ERROR:', error.response ? error.response.data : error.message);
-        res.status(500).json({ message: 'Failed to create payment due to an external error.' });
+        console.error('AXIOS_INVOICE_ERROR:', error.response ? error.response.data : error.message);
+        res.status(500).json({ message: 'Failed to create invoice due to an external error.' });
     }
 };
