@@ -1,74 +1,135 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kripto Bağış</title>
+    <title>Kripto Bağış Platformu</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide-react@0.378.0/dist/umd/lucide.js"></script>
+    <!-- Custom Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="container">
-        <h1>Kripto Bağış</h1>
-        <form id="donation-form">
-            <div class="form-group">
-                <label for="amount">Miktar (USD)</label>
-                <input type="number" id="amount" name="amount" min="1" required>
-            </div>
-            <div class="form-group">
-                <label for="currency">Para Birimi</label>
-                <select id="currency" name="currency">
-                    <option value="trx">TRX (Tron)</option>
-                    <option value="usdttrc20">USDT (TRC-20)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="email">E-posta (İsteğe Bağlı)</label>
-                <input type="email" id="email" name="email">
-            </div>
-            <div class="form-group">
-                <label for="message">Mesaj (İsteğe Bağlı)</label>
-                <textarea id="message" name="message" rows="4"></textarea>
-            </div>
-            <button type="submit" id="donate-button">Bağış Yap</button>
-        </form>
-        <div id="response"></div>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen font-sans p-4">
 
-        <div id="payment-details" class="hidden">
-            <h2>Bağışınızı Tamamlayın</h2>
-            <p>Lütfen tam tutarı aşağıdaki adrese gönderin.</p>
-            <div class="payment-info">
-                <div class="info-line">
-                    <strong>Ağ:</strong> <span id="payment-network"></span>
+    <div id="app-container" class="w-full max-w-md">
+        <!-- Donation Form View -->
+        <div id="donation-view" class="bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-2xl shadow-blue-500/10 transition-all duration-500">
+            <div class="flex flex-col items-center text-center mb-8">
+                <div class="bg-gray-700 p-3 rounded-full mb-4">
+                    <i data-lucide="gem" class="text-blue-400 w-8 h-8"></i>
                 </div>
-                <div class="info-line">
-                    <strong>Miktar:</strong> <span id="payment-amount"></span>
-                </div>
-                <div class="info-line">
-                    <strong>Adres:</strong> <span id="payment-address"></span>
-                    <button id="copy-address" title="Adresi Kopyala">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
-                            <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
-                            <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
-                        </svg>
-                    </button>
-                </div>
+                <h1 class="text-2xl font-bold text-white">Kripto Bağış Platformu</h1>
+                <p class="text-gray-400 mt-2">Desteğiniz için teşekkür ederiz.</p>
             </div>
-            <div id="qrcode"></div>
-            <p class="small-text">Ödemenizi gönderdikten sonra onaylanması birkaç dakika sürebilir.</p>
+
+            <form id="donation-form" class="space-y-6">
+                <!-- Amount Input -->
+                <div class="relative">
+                    <i data-lucide="dollar-sign" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                    <input type="number" id="amount" name="amount" min="1" required placeholder="Bağış Miktarı (USD)" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                </div>
+
+                <!-- Currency Selection -->
+                <div>
+                    <label class="text-sm font-medium text-gray-300 mb-2 block">Para Birimi Seçin</label>
+                    <div id="currency-selector" class="grid grid-cols-2 gap-4">
+                        <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition has-[:checked]:border-blue-500 has-[:checked]:ring-2 has-[:checked]:ring-blue-500">
+                            <input type="radio" name="currency" value="trx" class="hidden" checked>
+                            <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png" alt="TRX" class="w-6 h-6">
+                            <span class="font-semibold text-white">TRX</span>
+                        </label>
+                         <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition has-[:checked]:border-blue-500 has-[:checked]:ring-2 has-[:checked]:ring-blue-500">
+                            <input type="radio" name="currency" value="usdttrc20" class="hidden">
+                            <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/825.png" alt="USDT" class="w-6 h-6">
+                            <span class="font-semibold text-white">USDT</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Optional Fields -->
+                <div class="relative">
+                     <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                    <input type="email" id="email" name="email" placeholder="E-posta (İsteğe Bağlı)" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                </div>
+                <div class="relative">
+                    <i data-lucide="message-square" class="absolute left-4 top-4 w-5 h-5 text-gray-400"></i>
+                    <textarea id="message" name="message" rows="3" placeholder="Mesajınız (İsteğe Bağlı)" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="donate-button" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all duration-300 flex items-center justify-center space-x-2 disabled:bg-gray-500 disabled:cursor-not-allowed">
+                    <span id="button-text">Bağış Yap</span>
+                    <div id="button-loader" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin hidden"></div>
+                </button>
+            </form>
         </div>
 
-        <div id="donation-details" class="hidden">
-            <h3>Bağış Detayları</h3>
-            <p id="donation-email"></p>
-            <p id="donation-message"></p>
+        <!-- Payment Details View -->
+        <div id="payment-view" class="hidden bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-2xl shadow-blue-500/10 text-center">
+            <h2 class="text-2xl font-bold text-white mb-2">Ödemeyi Tamamlayın</h2>
+            <p class="text-gray-400 mb-6">Lütfen aşağıdaki adrese tam tutarı gönderin.</p>
+            
+            <div id="qrcode" class="bg-white p-4 rounded-xl inline-block mb-6 border-4 border-gray-700"></div>
+
+            <div class="space-y-4 text-left">
+                <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400 font-medium">Ağ</span>
+                        <span id="payment-network" class="text-white font-semibold"></span>
+                    </div>
+                </div>
+                <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400 font-medium">Miktar</span>
+                        <span id="payment-amount" class="text-white font-semibold"></span>
+                    </div>
+                </div>
+                <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
+                    <div class="flex justify-between items-center">
+                        <div class="flex flex-col">
+                            <span class="text-gray-400 font-medium">Cüzdan Adresi</span>
+                            <span id="payment-address" class="text-white font-semibold break-all"></span>
+                        </div>
+                        <button id="copy-address" class="p-2 text-gray-400 hover:text-white transition">
+                            <i id="copy-icon" data-lucide="copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 flex items-center justify-center space-x-3 text-blue-400">
+                <div class="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                <span>Ödeme onayı bekleniyor...</span>
+            </div>
         </div>
 
-        <div id="success-message" class="hidden">
-            <h2>Teşekkürler!</h2>
-            <p>Bağışınız başarıyla alındı.</p>
+        <!-- Success View -->
+        <div id="success-view" class="hidden bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-2xl shadow-green-500/10 text-center">
+            <div class="bg-green-500/10 p-4 rounded-full inline-block mb-4">
+                <i data-lucide="check-circle-2" class="w-16 h-16 text-green-400"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-white">Teşekkürler!</h2>
+            <p class="text-gray-400 mt-2">Bağışınız başarıyla alındı. Desteğiniz bizim için çok değerli.</p>
         </div>
     </div>
+
+    <!-- Notification Element -->
+    <div id="notification" class="fixed bottom-5 right-5 bg-green-500 text-white py-3 px-6 rounded-xl shadow-lg translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-3">
+        <i data-lucide="check-circle" class="w-6 h-6"></i>
+        <span id="notification-message"></span>
+    </div>
+
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.js"></script>
     <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
