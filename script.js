@@ -13,7 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const paymentAmount = document.getElementById('payment-amount');
     const paymentAddress = document.getElementById('payment-address');
     const qrcodeDiv = document.getElementById('qrcode');
-    const copyAddressButton = document.getElementById('copy-address');
+    
+    // GÜNCELLENDİ: Yeni tıklanabilir container'ı ve ikonu seç
+    const copyContainer = document.getElementById('copy-container');
     const copyIcon = document.getElementById('copy-icon');
 
     let pollingInterval;
@@ -80,13 +82,13 @@ document.addEventListener('DOMContentLoaded', () => {
         startPolling(data.payment_id);
     }
 
-    // Adresi kopyalama butonu
-    copyAddressButton.addEventListener('click', () => {
+    // GÜNCELLENDİ: Olay dinleyicisini container'ın tamamına ekle
+    copyContainer.addEventListener('click', () => {
         const address = paymentAddress.textContent;
         navigator.clipboard.writeText(address).then(() => {
             showNotification('Adres panoya kopyalandı!');
             
-            // İkonu değiştir ve geri al
+            // İkonu "check" olarak değiştir ve 2 saniye sonra geri al
             copyIcon.removeAttribute('data-lucide');
             copyIcon.setAttribute('data-lucide', 'check');
             lucide.createIcons();
@@ -117,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (error) {
                 console.error('Ödeme durumu kontrol edilirken hata:', error);
-                // İsteğe bağlı olarak burada kullanıcıya bir hata mesajı gösterilebilir
             }
         }, 10000); // Her 10 saniyede bir kontrol et
     }

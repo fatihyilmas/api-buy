@@ -38,7 +38,9 @@ module.exports = async (req, res) => {
                 pay_address,
                 pay_amount,
                 pay_currency,
-                network
+                network,
+                email: email, // Pass back the email if provided
+                message: message // Pass back the message if provided
             });
         } else {
             console.error('NOWPAYMENTS_PAYMENT_ERROR:', response.data);
