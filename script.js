@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const paymentAddress = document.getElementById('payment-address');
     const qrcodeDiv = document.getElementById('qrcode');
     
-    // GÜNCELLENDİ: Yeni tıklanabilir container'ı ve ikonu seç
     const copyContainer = document.getElementById('copy-container');
     const copyIcon = document.getElementById('copy-icon');
 
@@ -76,19 +75,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const qr = qrcode(0, 'M');
         qr.addData(data.pay_address);
         qr.make();
-        qrcodeDiv.innerHTML = qr.createImgTag(6, 8); // Boyut ve kenar boşluğu
+        qrcodeDiv.innerHTML = qr.createImgTag(6, 8);
 
         // Ödeme durumunu kontrol etmeye başla
         startPolling(data.payment_id);
     }
 
-    // GÜNCELLENDİ: Olay dinleyicisini container'ın tamamına ekle
-    copyContainer.addEventListener('click', () => {
-        const address = paymentAddress.textContent;
-        navigator.clipboard.writeText(address).then(() => {
+    // GÜNCELLENDİ: Daha güvenilir kopyalama fonksiyonu
+    function copyToClipboard(text) {
+        // Geçici bir textarea oluştur
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        
+        // Görünmez yap ve DOM'a ekle
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        
+        // Metni seç ve kopyala
+        textarea.select();
+        try {
+            document.execCommand('copy');
             showNotification('Adres panoya kopyalandı!');
             
-            // İkonu "check" olarak değiştir ve 2 saniye sonra geri al
+            // İkonu değiştir ve geri al
             copyIcon.removeAttribute('data-lucide');
             copyIcon.setAttribute('data-lucide', 'check');
             lucide.createIcons();
@@ -99,10 +109,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 lucide.createIcons();
             }, 2000);
 
-        }).catch(err => {
+        } catch (err) {
+            console.error('Kopyalama başarısız oldu:', err);
             showNotification('Adres kopyalanamadı.', 'error');
-            console.error('Metin kopyalanamadı: ', err);
-        });
+        }
+        
+        // Geçici textarea'yı kaldır
+        document.body.removeChild(textarea);
+    }
+
+    copyContainer.addEventListener('click', () => {
+        const address = paymentAddress.textContent;
+        if (address) {
+            copyToClipboard(address);
+        }
     });
 
     // Ödeme durumunu periyodik olarak kontrol etme
@@ -112,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch(`/api/check-payment?payment_id=${paymentId}`);
                 const data = await response.json();
 
-                // Ödeme tamamlandıysa
                 if (['finished', 'confirmed', 'sending'].includes(data.payment_status)) {
                     clearInterval(pollingInterval);
                     showSuccessMessage();
@@ -143,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         notificationMessage.textContent = message;
         
-        // Bildirim tipine göre renk ayarı
         if (type === 'error') {
             notification.classList.remove('bg-green-500');
             notification.classList.add('bg-red-500');
@@ -152,10 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
             notification.classList.add('bg-green-500');
         }
 
-        // Bildirimi göster
         notification.classList.remove('opacity-0', 'translate-y-20');
         
-        // 3 saniye sonra gizle
         setTimeout(() => {
             notification.classList.add('opacity-0', 'translate-y-20');
         }, 3000);
