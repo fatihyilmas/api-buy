@@ -9,7 +9,7 @@ document.getElementById('donation-form').addEventListener('submit', async functi
     const donateButton = document.getElementById('donate-button');
 
     donateButton.disabled = true;
-    responseDiv.textContent = 'Processing...';
+    responseDiv.textContent = 'Creating payment...';
 
     try {
         const response = await fetch('/api/create-payment', {
@@ -23,14 +23,46 @@ document.getElementById('donation-form').addEventListener('submit', async functi
         const data = await response.json();
 
         if (response.ok) {
-            window.location.href = data.payment_url;
+            displayPaymentDetails(data);
         } else {
             responseDiv.textContent = `Error: ${data.message}`;
+            donateButton.disabled = false;
         }
     } catch (error) {
         responseDiv.textContent = 'An unexpected error occurred.';
         console.error(error);
-    } finally {
         donateButton.disabled = false;
     }
+});
+
+function displayPaymentDetails(data) {
+    document.getElementById('donation-form').classList.add('hidden');
+    document.getElementById('response').classList.add('hidden');
+
+    const paymentDetailsDiv = document.getElementById('payment-details');
+    const paymentAmountSpan = document.getElementById('payment-amount');
+    const paymentAddressSpan = document.getElementById('payment-address');
+    const qrcodeDiv = document.getElementById('qrcode');
+
+    paymentAmountSpan.textContent = `${data.pay_amount} ${data.pay_currency.toUpperCase()}`;
+    paymentAddressSpan.textContent = data.pay_address;
+
+    // Generate QR Code
+    qrcodeDiv.innerHTML = ''; // Clear previous QR code
+    const qr = qrcode(0, 'M');
+    qr.addData(data.pay_address);
+    qr.make();
+    qrcodeDiv.innerHTML = qr.createImgTag(4);
+
+    paymentDetailsDiv.classList.remove('hidden');
+}
+
+document.getElementById('copy-address').addEventListener('click', () => {
+    const address = document.getElementById('payment-address').textContent;
+    navigator.clipboard.writeText(address).then(() => {
+        alert('Address copied to clipboard!');
+    }, (err) => {
+        alert('Failed to copy address.');
+        console.error('Could not copy text: ', err);
+    });
 });

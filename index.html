@@ -32,7 +32,20 @@
             <button type="submit" id="donate-button">Donate</button>
         </form>
         <div id="response"></div>
+
+        <div id="payment-details" class="hidden">
+            <h2>Complete Your Donation</h2>
+            <p>Please send the exact amount to the address below.</p>
+            <div class="payment-info">
+                <strong>Amount:</strong> <span id="payment-amount"></span><br>
+                <strong>Address:</strong> <span id="payment-address"></span>
+                <button id="copy-address">Copy</button>
+            </div>
+            <div id="qrcode"></div>
+            <p class="small-text">Once you have sent the payment, it may take a few minutes to confirm.</p>
+        </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

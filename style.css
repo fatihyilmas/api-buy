@@ -61,3 +61,37 @@ button:hover {
     margin-top: 1rem;
     text-align: center;
 }
+
+.hidden {
+    display: none;
+}
+
+#payment-details {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+}
+
+.payment-info {
+    margin-bottom: 1rem;
+    word-wrap: break-word;
+}
+
+#copy-address {
+    margin-left: 10px;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    width: auto;
+}
+
+#qrcode {
+    margin: 1rem auto;
+    display: flex;
+    justify-content: center;
+}
+
+.small-text {
+    font-size: 0.8rem;
+    color: #777;
+    text-align: center;
+}
