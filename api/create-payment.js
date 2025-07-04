@@ -29,9 +29,14 @@ module.exports = async (req, res) => {
             }
         });
 
-        res.status(200).json({ payment_url: response.data.payment_url });
+        if (response.data && response.data.payment_url) {
+            res.status(200).json({ payment_url: response.data.payment_url });
+        } else {
+            console.error('NOWPAYMENTS_RESPONSE_ERROR:', response.data);
+            res.status(500).json({ message: 'Failed to get payment URL from NowPayments.' });
+        }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Failed to create payment.' });
+        console.error('AXIOS_ERROR:', error.response ? error.response.data : error.message);
+        res.status(500).json({ message: 'Failed to create payment due to an external error.' });
     }
 };
