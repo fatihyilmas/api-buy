@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Donation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Crypto Donation</h1>
+        <form id="donation-form">
+            <div class="form-group">
+                <label for="amount">Amount (USD)</label>
+                <input type="number" id="amount" name="amount" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="currency">Currency</label>
+                <select id="currency" name="currency">
+                    <option value="trx">TRX</option>
+                    <option value="usdt">USDT</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="email">Email (Optional)</label>
+                <input type="email" id="email" name="email">
+            </div>
+            <div class="form-group">
+                <label for="message">Message (Optional)</label>
+                <textarea id="message" name="message" rows="4"></textarea>
+            </div>
+            <button type="submit" id="donate-button">Donate</button>
+        </form>
+        <div id="response"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
