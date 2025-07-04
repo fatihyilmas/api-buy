@@ -30,14 +30,15 @@ module.exports = async (req, res) => {
             }
         });
 
-        const { payment_id, pay_address, pay_amount, pay_currency } = response.data;
+        const { payment_id, pay_address, pay_amount, pay_currency, network } = response.data;
 
-        if (payment_id && pay_address && pay_amount && pay_currency) {
+        if (payment_id && pay_address && pay_amount && pay_currency && network) {
             res.status(200).json({
                 payment_id,
                 pay_address,
                 pay_amount,
-                pay_currency
+                pay_currency,
+                network
             });
         } else {
             console.error('NOWPAYMENTS_PAYMENT_ERROR:', response.data);

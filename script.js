@@ -42,8 +42,10 @@ function displayPaymentDetails(data) {
     const paymentDetailsDiv = document.getElementById('payment-details');
     const paymentAmountSpan = document.getElementById('payment-amount');
     const paymentAddressSpan = document.getElementById('payment-address');
+    const paymentNetworkSpan = document.getElementById('payment-network');
     const qrcodeDiv = document.getElementById('qrcode');
 
+    paymentNetworkSpan.textContent = data.network.toUpperCase();
     paymentAmountSpan.textContent = `${data.pay_amount} ${data.pay_currency.toUpperCase()}`;
     paymentAddressSpan.textContent = data.pay_address;
 

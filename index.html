@@ -17,8 +17,8 @@
             <div class="form-group">
                 <label for="currency">Para Birimi</label>
                 <select id="currency" name="currency">
-                    <option value="trx">TRX</option>
-                    <option value="usdt">USDT</option>
+                    <option value="trx">TRX (Tron)</option>
+                    <option value="usdttrc20">USDT (TRC-20)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -37,9 +37,21 @@
             <h2>Bağışınızı Tamamlayın</h2>
             <p>Lütfen tam tutarı aşağıdaki adrese gönderin.</p>
             <div class="payment-info">
-                <strong>Miktar:</strong> <span id="payment-amount"></span><br>
-                <strong>Adres:</strong> <span id="payment-address"></span>
-                <button id="copy-address">Kopyala</button>
+                <div class="info-line">
+                    <strong>Ağ:</strong> <span id="payment-network"></span>
+                </div>
+                <div class="info-line">
+                    <strong>Miktar:</strong> <span id="payment-amount"></span>
+                </div>
+                <div class="info-line">
+                    <strong>Adres:</strong> <span id="payment-address"></span>
+                    <button id="copy-address" title="Adresi Kopyala">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+                            <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                            <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <div id="qrcode"></div>
             <p class="small-text">Ödemenizi gönderdikten sonra onaylanması birkaç dakika sürebilir.</p>
