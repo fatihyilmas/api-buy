@@ -6,6 +6,10 @@
             "use": "@vercel/node"
         },
         {
+            "src": "api/check-payment.js",
+            "use": "@vercel/node"
+        },
+        {
             "src": "*.html",
             "use": "@vercel/static"
         },
@@ -22,6 +26,10 @@
         {
             "src": "/api/create-payment",
             "dest": "/api/create-payment.js"
+        },
+        {
+            "src": "/api/check-payment",
+            "dest": "/api/check-payment.js"
         },
         {
             "src": "/",

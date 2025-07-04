@@ -55,6 +55,9 @@ function displayPaymentDetails(data) {
     qrcodeDiv.innerHTML = qr.createImgTag(4);
 
     paymentDetailsDiv.classList.remove('hidden');
+
+    // Start polling for payment status
+    startPolling(data.payment_id);
 }
 
 document.getElementById('copy-address').addEventListener('click', () => {
@@ -66,3 +69,26 @@ document.getElementById('copy-address').addEventListener('click', () => {
         console.error('Metin kopyalanamadı: ', err);
     });
 });
+
+let pollingInterval;
+
+function startPolling(paymentId) {
+    pollingInterval = setInterval(async () => {
+        try {
+            const response = await fetch(`/api/check-payment?payment_id=${paymentId}`);
+            const data = await response.json();
+
+            if (data.payment_status === 'finished' || data.payment_status === 'confirmed' || data.payment_status === 'sending') {
+                clearInterval(pollingInterval);
+                showSuccessMessage();
+            }
+        } catch (error) {
+            console.error('Error polling payment status:', error);
+        }
+    }, 10000); // Poll every 10 seconds
+}
+
+function showSuccessMessage() {
+    document.getElementById('payment-details').classList.add('hidden');
+    document.getElementById('success-message').classList.remove('hidden');
+}
