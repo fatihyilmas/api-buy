@@ -86,11 +86,32 @@ button:active {
     display: none;
 }
 
-#payment-details, #success-message {
+#payment-details, #success-message, #donation-details {
     margin-top: 2rem;
     padding-top: 1.5rem;
     border-top: 1px solid #444;
     text-align: center;
+}
+
+#donation-details {
+    text-align: left;
+    background-color: #3a3a3a;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    border-top: none;
+}
+
+#donation-details h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #ffffff;
+}
+
+#donation-details p {
+    margin: 0.5rem 0;
+    color: #e0e0e0;
+    word-wrap: break-word;
 }
 
 .payment-info {
@@ -121,6 +142,8 @@ button:active {
     color: #ffffff;
     font-weight: 600;
     max-width: 70%;
+    word-break: break-all;
+    text-align: right;
 }
 
 #copy-address {

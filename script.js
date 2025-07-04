@@ -58,6 +58,21 @@ function displayPaymentDetails(data) {
 
     paymentDetailsDiv.classList.remove('hidden');
 
+    // Display donation details if available
+    if (data.email || data.message) {
+        const donationDetailsDiv = document.getElementById('donation-details');
+        const emailP = document.getElementById('donation-email');
+        const messageP = document.getElementById('donation-message');
+
+        if (data.email) {
+            emailP.innerHTML = `<strong>E-posta:</strong> ${data.email}`;
+        }
+        if (data.message) {
+            messageP.innerHTML = `<strong>Mesaj:</strong> ${data.message}`;
+        }
+        donationDetailsDiv.classList.remove('hidden');
+    }
+
     // Start polling for payment status
     startPolling(data.payment_id);
 }
