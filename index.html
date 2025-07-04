@@ -3,46 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Donation</title>
+    <title>Kripto Bağış</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Crypto Donation</h1>
+        <h1>Kripto Bağış</h1>
         <form id="donation-form">
             <div class="form-group">
-                <label for="amount">Amount (USD)</label>
+                <label for="amount">Miktar (USD)</label>
                 <input type="number" id="amount" name="amount" min="1" required>
             </div>
             <div class="form-group">
-                <label for="currency">Currency</label>
+                <label for="currency">Para Birimi</label>
                 <select id="currency" name="currency">
                     <option value="trx">TRX</option>
                     <option value="usdt">USDT</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="email">Email (Optional)</label>
+                <label for="email">E-posta (İsteğe Bağlı)</label>
                 <input type="email" id="email" name="email">
             </div>
             <div class="form-group">
-                <label for="message">Message (Optional)</label>
+                <label for="message">Mesaj (İsteğe Bağlı)</label>
                 <textarea id="message" name="message" rows="4"></textarea>
             </div>
-            <button type="submit" id="donate-button">Donate</button>
+            <button type="submit" id="donate-button">Bağış Yap</button>
         </form>
         <div id="response"></div>
 
         <div id="payment-details" class="hidden">
-            <h2>Complete Your Donation</h2>
-            <p>Please send the exact amount to the address below.</p>
+            <h2>Bağışınızı Tamamlayın</h2>
+            <p>Lütfen tam tutarı aşağıdaki adrese gönderin.</p>
             <div class="payment-info">
-                <strong>Amount:</strong> <span id="payment-amount"></span><br>
-                <strong>Address:</strong> <span id="payment-address"></span>
-                <button id="copy-address">Copy</button>
+                <strong>Miktar:</strong> <span id="payment-amount"></span><br>
+                <strong>Adres:</strong> <span id="payment-address"></span>
+                <button id="copy-address">Kopyala</button>
             </div>
             <div id="qrcode"></div>
-            <p class="small-text">Once you have sent the payment, it may take a few minutes to confirm.</p>
+            <p class="small-text">Ödemenizi gönderdikten sonra onaylanması birkaç dakika sürebilir.</p>
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.js"></script>

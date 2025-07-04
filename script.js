@@ -9,7 +9,7 @@ document.getElementById('donation-form').addEventListener('submit', async functi
     const donateButton = document.getElementById('donate-button');
 
     donateButton.disabled = true;
-    responseDiv.textContent = 'Creating payment...';
+    responseDiv.textContent = 'Ödeme oluşturuluyor...';
 
     try {
         const response = await fetch('/api/create-payment', {
@@ -25,11 +25,11 @@ document.getElementById('donation-form').addEventListener('submit', async functi
         if (response.ok) {
             displayPaymentDetails(data);
         } else {
-            responseDiv.textContent = `Error: ${data.message}`;
+            responseDiv.textContent = `Hata: ${data.message}`;
             donateButton.disabled = false;
         }
     } catch (error) {
-        responseDiv.textContent = 'An unexpected error occurred.';
+        responseDiv.textContent = 'Beklenmedik bir hata oluştu.';
         console.error(error);
         donateButton.disabled = false;
     }
@@ -60,9 +60,9 @@ function displayPaymentDetails(data) {
 document.getElementById('copy-address').addEventListener('click', () => {
     const address = document.getElementById('payment-address').textContent;
     navigator.clipboard.writeText(address).then(() => {
-        alert('Address copied to clipboard!');
+        alert('Adres panoya kopyalandı!');
     }, (err) => {
-        alert('Failed to copy address.');
-        console.error('Could not copy text: ', err);
+        alert('Adres kopyalanamadı.');
+        console.error('Metin kopyalanamadı: ', err);
     });
 });
