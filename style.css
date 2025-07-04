@@ -4,28 +4,22 @@
   belirtilmesi gereken eklemeler için kullanılır.
 */
 
-/* Google Fonts'tan 'Inter' fontunu HTML dosyasına <link> etiketi ile dahil ettik. 
-   Bu, en iyi performansı sağlar. */
 body {
     font-family: 'Inter', sans-serif;
-    /* Geri kalan tüm body stilleri (arka plan rengi, hizalama vb.) 
-       Tailwind sınıfları ile HTML'de tanımlanmıştır. */
+    /* Arka plan rengi ve diğer temel stiller artık doğrudan 
+       body etiketinde Tailwind sınıfları ile ayarlanıyor. */
 }
 
 /* Form elemanlarına tıklandığında (focus) tarayıcının varsayılan olarak 
-  eklediği dış çerçeveyi (outline) kaldırıyoruz. Bunun yerine Tailwind'in 
-  'focus:ring' gibi daha modern ve özelleştirilebilir yardımcı sınıflarını kullanıyoruz.
-*/
+  eklediği dış çerçeveyi (outline) kaldırıyoruz. */
 input:focus, select:focus, textarea:focus, button:focus {
     outline: none;
 }
 
-/* QR kodunu içeren <img> etiketine özel stil.
-  Bu, qrcode.js kütüphanesinin oluşturduğu görsele stil vermek için gereklidir.
-*/
+/* QR kodunu içeren <img> etiketine özel stil. */
 #qrcode img {
-    border-radius: 0.75rem; /* Tailwind'deki 'rounded-xl' sınıfına karşılık gelir */
+    border-radius: 0.75rem; /* rounded-xl */
     width: 160px;
     height: 160px;
-    border: 4px solid #374151; /* Tailwind'deki 'border-gray-700' sınıfına karşılık gelir */
+    border: 4px solid #374151; /* border-gray-700 */
 }

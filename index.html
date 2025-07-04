@@ -15,20 +15,33 @@
     <!-- Custom Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-900 flex items-center justify-center min-h-screen font-sans p-4">
+<body class="bg-gray-900 font-sans p-4">
 
-    <div id="app-container" class="w-full max-w-md">
+    <div id="app-container" class="w-full">
         <!-- Donation Form View -->
-        <div id="donation-view" class="bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-2xl shadow-blue-500/10 transition-all duration-500">
-            <div class="flex flex-col items-center text-center mb-8">
-                <div class="bg-gray-700 p-3 rounded-full mb-4">
-                    <i data-lucide="gem" class="text-blue-400 w-8 h-8"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-white">Kripto Bağış Platformu</h1>
-                <p class="text-gray-400 mt-2">Desteğiniz için teşekkür ederiz.</p>
+        <div id="donation-view" class="transition-all duration-500">
+            <!-- GÜNCELLENDİ: Yeni Başlık Alanı -->
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold text-white flex items-center justify-center space-x-3">
+                    <span class="text-red-400 animate-pulse">💖</span>
+                    <span class="text-red-400 animate-pulse" style="animation-delay: 0.1s;">💖</span>
+                    <span>Support the Project</span>
+                    <span class="text-red-400 animate-pulse" style="animation-delay: 0.2s;">💖</span>
+                    <span class="text-red-400 animate-pulse" style="animation-delay: 0.3s;">💖</span>
+                </h1>
+                <p class="text-gray-400 mt-2 max-w-xl mx-auto">Your support is very valuable for the development and sustainability of our project.</p>
             </div>
 
-            <form id="donation-form" class="space-y-6">
+            <!-- GÜNCELLENDİ: Yeni Fikir Kutusu -->
+            <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 mb-8 max-w-xl mx-auto flex items-start space-x-4">
+                <i data-lucide="lightbulb" class="w-8 h-8 text-yellow-400 flex-shrink-0 mt-1"></i>
+                <div>
+                    <h3 class="font-semibold text-white">Have an Idea?</h3>
+                    <p class="text-gray-400 text-sm mt-1">Want a new feature or have a suggestion? Let us know by adding your note in the 'Message' section when you donate. We prioritize our developments based on these requests!</p>
+                </div>
+            </div>
+            
+            <form id="donation-form" class="space-y-6 max-w-md mx-auto">
                 <!-- Amount Input -->
                 <div class="relative">
                     <i data-lucide="dollar-sign" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
@@ -37,7 +50,6 @@
 
                 <!-- Currency Selection -->
                 <div>
-                    <label class="text-sm font-medium text-gray-300 mb-2 block">Para Birimi Seçin</label>
                     <div id="currency-selector" class="grid grid-cols-2 gap-4">
                         <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition has-[:checked]:border-blue-500 has-[:checked]:ring-2 has-[:checked]:ring-blue-500">
                             <input type="radio" name="currency" value="trx" class="hidden" checked>
@@ -71,52 +83,55 @@
         </div>
 
         <!-- Payment Details View -->
-        <div id="payment-view" class="hidden bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-2xl shadow-blue-500/10 text-center">
-            <h2 class="text-2xl font-bold text-white mb-2">Ödemeyi Tamamlayın</h2>
-            <p class="text-gray-400 mb-6">Lütfen aşağıdaki adrese tam tutarı gönderin.</p>
-            
-            <div id="qrcode" class="bg-white p-4 rounded-xl inline-block mb-6 border-4 border-gray-700"></div>
+        <div id="payment-view" class="hidden max-w-md mx-auto">
+            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 text-center">
+                <h2 class="text-2xl font-bold text-white mb-2">Ödemeyi Tamamlayın</h2>
+                <p class="text-gray-400 mb-6">Lütfen aşağıdaki adrese tam tutarı gönderin.</p>
+                
+                <div id="qrcode" class="bg-white p-4 rounded-xl inline-block mb-6 border-4 border-gray-700"></div>
 
-            <div class="space-y-4 text-left">
-                <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-400 font-medium">Ağ</span>
-                        <span id="payment-network" class="text-white font-semibold"></span>
-                    </div>
-                </div>
-                <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-400 font-medium">Miktar</span>
-                        <span id="payment-amount" class="text-white font-semibold"></span>
-                    </div>
-                </div>
-                <!-- GÜNCELLENDİ: Tıklanabilir Cüzdan Adresi Alanı -->
-                <div id="copy-container" class="bg-gray-900 p-4 rounded-xl border border-gray-700 cursor-pointer hover:border-blue-500 transition group">
-                    <div class="flex justify-between items-center">
-                        <div class="flex-1 min-w-0">
-                            <span class="text-gray-400 font-medium block">Cüzdan Adresi</span>
-                            <span id="payment-address" class="text-white font-semibold break-all"></span>
-                        </div>
-                        <div class="pl-3 text-gray-400 group-hover:text-white transition">
-                            <i id="copy-icon" data-lucide="copy" class="w-5 h-5"></i>
+                <div class="space-y-4 text-left">
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400 font-medium">Ağ</span>
+                            <span id="payment-network" class="text-white font-semibold"></span>
                         </div>
                     </div>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400 font-medium">Miktar</span>
+                            <span id="payment-amount" class="text-white font-semibold"></span>
+                        </div>
+                    </div>
+                    <div id="copy-container" class="bg-gray-900 p-4 rounded-xl border border-gray-700 cursor-pointer hover:border-blue-500 transition group">
+                        <div class="flex justify-between items-center">
+                            <div class="flex-1 min-w-0">
+                                <span class="text-gray-400 font-medium block">Cüzdan Adresi</span>
+                                <span id="payment-address" class="text-white font-semibold break-all"></span>
+                            </div>
+                            <div class="pl-3 text-gray-400 group-hover:text-white transition">
+                                <i id="copy-icon" data-lucide="copy" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="mt-8 flex items-center justify-center space-x-3 text-blue-400">
-                <div class="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                <span>Ödeme onayı bekleniyor...</span>
+                <div class="mt-8 flex items-center justify-center space-x-3 text-blue-400">
+                    <div class="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                    <span>Ödeme onayı bekleniyor...</span>
+                </div>
             </div>
         </div>
 
         <!-- Success View -->
-        <div id="success-view" class="hidden bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-2xl shadow-green-500/10 text-center">
-            <div class="bg-green-500/10 p-4 rounded-full inline-block mb-4">
-                <i data-lucide="check-circle-2" class="w-16 h-16 text-green-400"></i>
+        <div id="success-view" class="hidden max-w-md mx-auto">
+             <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 text-center">
+                <div class="bg-green-500/10 p-4 rounded-full inline-block mb-4">
+                    <i data-lucide="check-circle-2" class="w-16 h-16 text-green-400"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-white">Teşekkürler!</h2>
+                <p class="text-gray-400 mt-2">Bağışınız başarıyla alındı. Desteğiniz bizim için çok değerli.</p>
             </div>
-            <h2 class="text-3xl font-bold text-white">Teşekkürler!</h2>
-            <p class="text-gray-400 mt-2">Bağışınız başarıyla alındı. Desteğiniz bizim için çok değerli.</p>
         </div>
     </div>
 
