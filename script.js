@@ -14,46 +14,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const paymentAmount = document.getElementById('payment-amount');
     const paymentAddress = document.getElementById('payment-address');
     const qrcodeDiv = document.getElementById('qrcode');
+    
     const copyContainer = document.getElementById('copy-container');
     const copyIcon = document.getElementById('copy-icon');
-    const minAmountInfo = document.getElementById('min-amount-info');
-    const currencyRadios = document.querySelectorAll('input[name="currency"]');
 
     let pollingInterval;
 
-    // Minimum tutarı getiren ve gösteren fonksiyon
-    const fetchAndDisplayMinAmount = async (currency) => {
-        minAmountInfo.textContent = 'Yükleniyor...';
-        try {
-            const response = await fetch(`/api/get-min-amount?currency_from=${currency}`);
-            const data = await response.json();
-
-            if (response.ok && data.min_amount !== undefined) {
-                minAmountInfo.textContent = `Minimum tutar: ${data.min_amount} USD`;
-                // Miktar input'unun min özelliğini de dinamik olarak ayarla
-                amountInput.min = data.min_amount;
-            } else {
-                minAmountInfo.textContent = 'Minimum tutar alınamadı.';
-                amountInput.min = '0'; // Hata durumunda varsayılan
-            }
-        } catch (error) {
-            console.error('Minimum tutar alınırken hata:', error);
-            minAmountInfo.textContent = 'Minimum tutar kontrol edilemedi.';
-            amountInput.min = '0';
+    // Miktar alanından odak çıkınca minimum değeri kontrol et
+    amountInput.addEventListener('blur', () => {
+        const value = parseFloat(amountInput.value);
+        // Değer varsa ve 10'dan küçükse, 10'a ayarla
+        if (amountInput.value && value < 10) {
+            amountInput.value = 10;
         }
-    };
-
-    // Para birimi değiştiğinde minimum tutarı güncelle
-    currencyRadios.forEach(radio => {
-        radio.addEventListener('change', (event) => {
-            fetchAndDisplayMinAmount(event.target.value);
-        });
     });
-
-    // Sayfa ilk yüklendiğinde seçili olan para birimi için minimum tutarı getir
-    const initiallyCheckedCurrency = document.querySelector('input[name="currency"]:checked').value;
-    fetchAndDisplayMinAmount(initiallyCheckedCurrency);
-
 
     // Bağış formu gönderildiğinde
     donationForm.addEventListener('submit', async function(event) {

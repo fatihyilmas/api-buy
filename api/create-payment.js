@@ -25,18 +25,7 @@ module.exports = async (req, res) => {
     }
 
     try {
-        // 1. Adım: NowPayments'ten minimum ödeme miktarını kontrol et
-        const minAmountResponse = await apiClient.get(`min-amount?currency_from=${currency}&currency_to=usd`);
-        const minAmount = minAmountResponse.data.min_amount;
-
-        if (amount < minAmount) {
-            return res.status(400).json({ 
-                error: true, 
-                message: `Bu para birimi için minimum bağış tutarı ${minAmount} USD değerindedir.` 
-            });
-        }
-
-        // 2. Adım: Ödemeyi oluştur
+        // Dinamik minimum tutar kontrolü kaldırıldı.
         const response = await apiClient.post('payment', {
             price_amount: amount,
             price_currency: 'usd',
