@@ -24,18 +24,18 @@
             <div class="text-center mb-8">
                 <h1 class="text-3xl font-bold text-white flex items-center justify-center space-x-3">
                     <span class="text-red-400 animate-pulse">💖</span>
-                    <span>Support the Project</span>
+                    <span data-i18n-key="support_project">Support the Project</span>
                     <span class="text-red-400 animate-pulse" style="animation-delay: 0.2s;">💖</span>
                 </h1>
-                <p class="text-gray-400 mt-2 max-w-xl mx-auto">Your support is very valuable for the development and sustainability of our project.</p>
+                <p class="text-gray-400 mt-2 max-w-xl mx-auto" data-i18n-key="support_valuable">Your support is very valuable for the development and sustainability of our project.</p>
             </div>
 
             <!-- Fikir Kutusu -->
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 mb-8 max-w-3xl mx-auto flex items-start space-x-4">
                 <i data-lucide="lightbulb" class="w-8 h-8 text-yellow-400 flex-shrink-0 mt-1"></i>
                 <div>
-                    <h3 class="font-semibold text-white">Have an Idea?</h3>
-                    <p class="text-gray-400 text-sm mt-1">Want a new feature or have a suggestion? Let us know by adding your note in the 'Message' section. We prioritize developments based on these requests!</p>
+                    <h3 class="font-semibold text-white" data-i18n-key="have_idea">Have an Idea?</h3>
+                    <p class="text-gray-400 text-sm mt-1" data-i18n-key="idea_description">Want a new feature or have a suggestion? Let us know by adding your note in the 'Message' section. We prioritize developments based on these requests!</p>
                 </div>
             </div>
             
@@ -47,7 +47,7 @@
                         <div>
                             <div class="relative">
                                 <i data-lucide="dollar-sign" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                                <input type="number" id="amount" name="amount" min="10" required placeholder="Bağış Miktarı (Min 10 USD)" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                                <input type="number" id="amount" name="amount" min="10" required data-i18n-placeholder-key="amount_placeholder" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                             </div>
                         </div>
                         <div id="currency-selector" class="grid grid-cols-2 gap-4">
@@ -72,21 +72,31 @@
                                 <span class="font-semibold text-white">LTC</span>
                             </label>
                         </div>
-                        <!-- Submit Button (Buraya Taşındı) -->
-                        <button type="submit" id="donate-button" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all duration-300 flex items-center justify-center space-x-2 disabled:bg-gray-500 disabled:cursor-not-allowed">
-                            <span id="button-text">Bağış Yap</span>
-                            <div id="button-loader" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin hidden"></div>
-                        </button>
+                        <!-- Submit Button & Language Selector -->
+                        <div class="flex items-center gap-4">
+                            <button type="submit" id="donate-button" class="flex-grow bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all duration-300 flex items-center justify-center space-x-2 disabled:bg-gray-500 disabled:cursor-not-allowed">
+                                <span id="button-text" data-i18n-key="donate_button">Donate</span>
+                                <div id="button-loader" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin hidden"></div>
+                            </button>
+                            <div class="relative">
+                                <i data-lucide="globe" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"></i>
+                                <select id="language-selector" class="bg-gray-800 border border-gray-700 text-white rounded-xl py-3 pl-10 pr-4 appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition cursor-pointer">
+                                    <option value="en">English</option>
+                                    <option value="tr">Türkçe</option>
+                                    <!-- Diğer diller buraya eklenecek -->
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <!-- Sağ Sütun -->
                     <div class="space-y-6">
                         <div class="relative">
                              <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                            <input type="email" id="email" name="email" placeholder="E-posta (İsteğe Bağlı)" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                            <input type="email" id="email" name="email" data-i18n-placeholder-key="email_placeholder" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                         </div>
                         <div class="relative">
                             <i data-lucide="message-square" class="absolute left-4 top-4 w-5 h-5 text-gray-400"></i>
-                            <textarea id="message" name="message" placeholder="Mesajınız (İsteğe Bağlı)" class="w-full h-40 bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"></textarea>
+                            <textarea id="message" name="message" data-i18n-placeholder-key="message_placeholder" class="w-full h-40 bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"></textarea>
                         </div>
                     </div>
                 </div>
@@ -96,7 +106,7 @@
         <!-- Yatay Ödeme Sayfası -->
         <div id="payment-view" class="hidden">
             <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 max-w-3xl mx-auto">
-                <h2 class="text-2xl font-bold text-white mb-6 text-center">Ödemeyi Tamamlayın</h2>
+                <h2 class="text-2xl font-bold text-white mb-6 text-center" data-i18n-key="complete_payment">Complete the Payment</h2>
                 <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
                     <!-- Sol Sütun: QR Kod -->
                     <div class="flex-shrink-0">
@@ -106,20 +116,20 @@
                     <div class="flex-1 w-full space-y-4 text-left">
                         <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-400 font-medium">Ağ</span>
+                                <span class="text-gray-400 font-medium" data-i18n-key="network">Network</span>
                                 <span id="payment-network" class="text-white font-semibold"></span>
                             </div>
                         </div>
                         <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-400 font-medium">Miktar</span>
+                                <span class="text-gray-400 font-medium" data-i18n-key="amount">Amount</span>
                                 <span id="payment-amount" class="text-white font-semibold"></span>
                             </div>
                         </div>
                         <div id="copy-container" class="bg-gray-900 p-4 rounded-xl border border-gray-700 cursor-pointer hover:border-blue-500 transition group">
                             <div class="flex justify-between items-center">
                                 <div class="flex-1 min-w-0 text-center">
-                                    <span class="text-gray-400 font-medium block">Cüzdan Adresi</span>
+                                    <span class="text-gray-400 font-medium block" data-i18n-key="wallet_address">Wallet Address</span>
                                     <span id="payment-address" class="text-white font-semibold break-all"></span>
                                 </div>
                                 <div class="pl-3 text-gray-400 group-hover:text-white transition">
@@ -129,7 +139,7 @@
                         </div>
                          <div class="mt-6 flex items-center justify-center space-x-3 text-blue-400">
                             <div class="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                            <span>Ödeme onayı bekleniyor...</span>
+                            <span data-i18n-key="waiting_for_payment">Waiting for payment confirmation...</span>
                         </div>
                     </div>
                 </div>
@@ -142,8 +152,8 @@
                 <div class="bg-green-500/10 p-4 rounded-full inline-block mb-4">
                     <i data-lucide="check-circle-2" class="w-16 h-16 text-green-400"></i>
                 </div>
-                <h2 class="text-3xl font-bold text-white">Teşekkürler!</h2>
-                <p class="text-gray-400 mt-2">Bağışınız başarıyla alındı. Desteğiniz bizim için çok değerli.</p>
+                <h2 class="text-3xl font-bold text-white" data-i18n-key="thank_you">Thank You!</h2>
+                <p class="text-gray-400 mt-2" data-i18n-key="donation_successful">Your donation has been received successfully. Your support is very valuable to us.</p>
             </div>
         </div>
     </div>

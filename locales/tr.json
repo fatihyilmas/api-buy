@@ -1,0 +1,22 @@
+{
+  "support_project": "Projeyi Destekle",
+  "support_valuable": "Desteğiniz, projemizin geliştirilmesi ve sürdürülebilirliği için çok değerlidir.",
+  "have_idea": "Bir Fikrin mi Var?",
+  "idea_description": "Yeni bir özellik mi istiyorsunuz veya bir öneriniz mi var? 'Mesaj' bölümüne notunuzu ekleyerek bize bildirin. Geliştirmeleri bu isteklere göre önceliklendiriyoruz!",
+  "amount_placeholder": "Bağış Miktarı (Min 10 USD)",
+  "email_placeholder": "E-posta (İsteğe Bağlı)",
+  "message_placeholder": "Mesajınız (İsteğe Bağlı)",
+  "donate_button": "Bağış Yap",
+  "button_creating": "Oluşturuluyor...",
+  "complete_payment": "Ödemeyi Tamamlayın",
+  "network": "Ağ",
+  "amount": "Miktar",
+  "wallet_address": "Cüzdan Adresi",
+  "waiting_for_payment": "Ödeme onayı bekleniyor...",
+  "thank_you": "Teşekkürler!",
+  "donation_successful": "Bağışınız başarıyla alındı. Desteğiniz bizim için çok değerli.",
+  "address_copied": "Adres panoya kopyalandı!",
+  "copy_failed": "Adres kopyalanamadı.",
+  "min_amount_usd": "Minimum 10 USD",
+  "select_language": "Dil"
+}

@@ -1,4 +1,66 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- I18N (Internationalization) Setup ---
+    const supportedLangs = ['en', 'tr'];
+    const defaultLang = 'en';
+    let translations = {};
+
+    const languageSelector = document.getElementById('language-selector');
+
+    const applyTranslations = () => {
+        document.querySelectorAll('[data-i18n-key]').forEach(element => {
+            const key = element.getAttribute('data-i18n-key');
+            element.textContent = translations[key] || key;
+        });
+        document.querySelectorAll('[data-i18n-placeholder-key]').forEach(element => {
+            const key = element.getAttribute('data-i18n-placeholder-key');
+            element.placeholder = translations[key] || key;
+        });
+    };
+
+    const loadLanguage = async (lang) => {
+        try {
+            const response = await fetch(`locales/${lang}.json`);
+            if (!response.ok) {
+                throw new Error(`Could not load ${lang}.json`);
+            }
+            translations = await response.json();
+            document.documentElement.lang = lang;
+            applyTranslations();
+            // Re-create icons in case any were added dynamically
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        } catch (error) {
+            console.error('Failed to load language file:', error);
+            if (lang !== defaultLang) {
+                loadLanguage(defaultLang); // Fallback to default language
+            }
+        }
+    };
+
+    const initI18n = () => {
+        const savedLang = localStorage.getItem('language');
+        const browserLang = navigator.language.split('-')[0];
+        
+        let langToLoad = defaultLang;
+        if (savedLang && supportedLangs.includes(savedLang)) {
+            langToLoad = savedLang;
+        } else if (supportedLangs.includes(browserLang)) {
+            langToLoad = browserLang;
+        }
+
+        languageSelector.value = langToLoad;
+        loadLanguage(langToLoad);
+    };
+
+    languageSelector.addEventListener('change', (e) => {
+        const selectedLang = e.target.value;
+        localStorage.setItem('language', selectedLang);
+        loadLanguage(selectedLang);
+    });
+
+    // --- Application Logic ---
+    
     // Gerekli DOM elementlerini seç
     const donationForm = document.getElementById('donation-form');
     const amountInput = document.getElementById('amount');
@@ -23,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Miktar alanından odak çıkınca minimum değeri kontrol et
     amountInput.addEventListener('blur', () => {
         const value = parseFloat(amountInput.value);
-        // Değer varsa ve 10'dan küçükse, 10'a ayarla
         if (amountInput.value && value < 10) {
             amountInput.value = 10;
         }
@@ -33,23 +94,19 @@ document.addEventListener('DOMContentLoaded', () => {
     donationForm.addEventListener('submit', async function(event) {
         event.preventDefault();
 
-        // Butonu yüklenme durumuna getir
         donateButton.disabled = true;
-        buttonText.textContent = 'Oluşturuluyor...';
+        buttonText.textContent = translations['button_creating'] || 'Creating...';
         buttonLoader.classList.remove('hidden');
 
-        // Form verilerini al
         const amount = document.getElementById('amount').value;
         const currency = document.querySelector('input[name="currency"]:checked').value;
         const email = document.getElementById('email').value;
         const message = document.getElementById('message').value;
 
         try {
-            // API'ye ödeme oluşturma isteği gönder
             const response = await fetch('/api/create-payment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                // Backend'in number tipinde beklediği amount değerini sayıya çevirerek gönder
                 body: JSON.stringify({ 
                     amount: parseFloat(amount), 
                     currency, 
@@ -60,71 +117,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
-            // API'den gelen yanıta göre işlem yap
             if (response.ok && !data.error) {
                 displayPaymentDetails(data);
             } else {
-                // API'den gelen özel hata mesajını göster
-                showNotification(data.message || 'Bir hata oluştu.', 'error');
+                showNotification(data.message || 'An error occurred.', 'error');
                 resetButton();
             }
         } catch (error) {
-            console.error('Ödeme oluşturma sırasında bir ağ hatası veya beklenmedik bir sorun oluştu:', error);
-            showNotification('Sunucuyla iletişim kurulamadı. Lütfen internet bağlantınızı kontrol edin.', 'error');
+            console.error('Error creating payment:', error);
+            showNotification('Could not connect to the server. Please check your internet connection.', 'error');
             resetButton();
         }
     });
 
-    // GÜNCELLENDİ: Ödeme detaylarını gösterme fonksiyonu
     function displayPaymentDetails(data) {
-        // Görünümleri değiştir
         donationView.classList.add('hidden');
         paymentView.classList.remove('hidden');
 
-        // GÜNCELLENDİ: Daha esnek para birimi ve ağ adı yönetimi
         let currencySymbol = data.pay_currency.toUpperCase();
         if (currencySymbol === 'USDTTRC20') {
             currencySymbol = 'USDT';
         }
-        // LTC için genellikle sadece 'LTC' döner, bu yüzden ekstra bir kontrole gerek yok.
         
         const networkName = data.network.toUpperCase();
 
-        // Bilgileri doğru şekilde doldur
         paymentNetwork.textContent = networkName;
         paymentAmount.textContent = `${data.pay_amount} ${currencySymbol}`;
         paymentAddress.textContent = data.pay_address;
 
-        // QR Kodu oluştur
         qrcodeDiv.innerHTML = '';
         const qr = qrcode(0, 'M');
         qr.addData(data.pay_address);
         qr.make();
         qrcodeDiv.innerHTML = qr.createImgTag(6, 8);
 
-        // Ödeme durumunu kontrol etmeye başla
         startPolling(data.payment_id);
     }
 
-    // GÜNCELLENDİ: Modern ve daha güvenilir kopyalama fonksiyonu
     async function copyToClipboard(text) {
-        // Modern `navigator.clipboard` API'sini kullan
         if (!navigator.clipboard) {
-            showNotification('Kopyalama bu tarayıcıda desteklenmiyor.', 'error');
+            showNotification('Copying is not supported in this browser.', 'error');
             return;
         }
 
         try {
             await navigator.clipboard.writeText(text);
-            showNotification('Adres panoya kopyalandı!');
+            showNotification(translations['address_copied'] || 'Address copied to clipboard!');
 
-            // İkonu 'check' olarak değiştir ve lucide'ı çalıştır
             copyIcon.setAttribute('data-lucide', 'check');
             if (window.lucide) {
                 lucide.createIcons();
             }
 
-            // 2 saniye sonra ikonu eski haline getir
             setTimeout(() => {
                 copyIcon.setAttribute('data-lucide', 'copy');
                 if (window.lucide) {
@@ -133,8 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 2000);
 
         } catch (err) {
-            console.error('Kopyalama başarısız oldu:', err);
-            showNotification('Adres kopyalanamadı.', 'error');
+            console.error('Failed to copy:', err);
+            showNotification(translations['copy_failed'] || 'Failed to copy address.', 'error');
         }
     }
 
@@ -145,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Ödeme durumunu periyodik olarak kontrol etme
     function startPolling(paymentId) {
         pollingInterval = setInterval(async () => {
             try {
@@ -157,25 +200,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     showSuccessMessage();
                 }
             } catch (error) {
-                console.error('Ödeme durumu kontrol edilirken hata:', error);
+                console.error('Error checking payment status:', error);
             }
         }, 10000);
     }
 
-    // Başarı mesajını göster
     function showSuccessMessage() {
         paymentView.classList.add('hidden');
         successView.classList.remove('hidden');
     }
     
-    // Butonu varsayılan durumuna döndür
     function resetButton() {
         donateButton.disabled = false;
-        buttonText.textContent = 'Bağış Yap';
+        buttonText.textContent = translations['donate_button'] || 'Donate';
         buttonLoader.classList.add('hidden');
     }
 
-    // Bildirim gösterme fonksiyonu
     function showNotification(message, type = 'success') {
         const notification = document.getElementById('notification');
         const notificationMessage = document.getElementById('notification-message');
@@ -197,15 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    // Sayfa yüklendiğinde ve lucide hazır olduğunda ikonları oluştur
-    if (window.lucide) {
-        lucide.createIcons();
-    } else {
-        // Eğer lucide hemen hazır değilse, bir gecikme ile tekrar dene
-        setTimeout(() => {
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-        }, 100);
-    }
+    // Initialize I18n
+    initI18n();
 });
