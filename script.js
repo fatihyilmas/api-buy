@@ -89,40 +89,42 @@ document.addEventListener('DOMContentLoaded', () => {
         startPolling(data.payment_id);
     }
 
-    // GÜNCELLENDİ: Güvenilir kopyalama fonksiyonu
-    function copyToClipboard(text) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'absolute';
-        textarea.style.left = '-9999px';
-        document.body.appendChild(textarea);
-        
-        textarea.select();
-        try {
-            document.execCommand('copy');
-            showNotification('Adres panoya kopyalandı!');
-            
-            // İkonu değiştir ve sonra lucide'ı çalıştır
-            copyIcon.setAttribute('data-lucide', 'check');
-            lucide.createIcons();
+    // GÜNCELLENDİ: Modern ve daha güvenilir kopyalama fonksiyonu
+    async function copyToClipboard(text) {
+        // Modern `navigator.clipboard` API'sini kullan
+        if (!navigator.clipboard) {
+            showNotification('Kopyalama bu tarayıcıda desteklenmiyor.', 'error');
+            return;
+        }
 
+        try {
+            await navigator.clipboard.writeText(text);
+            showNotification('Adres panoya kopyalandı!');
+
+            // İkonu 'check' olarak değiştir ve lucide'ı çalıştır
+            copyIcon.setAttribute('data-lucide', 'check');
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            // 2 saniye sonra ikonu eski haline getir
             setTimeout(() => {
                 copyIcon.setAttribute('data-lucide', 'copy');
-                lucide.createIcons();
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
             }, 2000);
 
         } catch (err) {
             console.error('Kopyalama başarısız oldu:', err);
             showNotification('Adres kopyalanamadı.', 'error');
-        } finally {
-            document.body.removeChild(textarea);
         }
     }
 
-    copyContainer.addEventListener('click', () => {
+    copyContainer.addEventListener('click', async () => {
         const address = paymentAddress.textContent;
         if (address) {
-            copyToClipboard(address);
+            await copyToClipboard(address);
         }
     });
 
@@ -178,6 +180,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    // Sayfa yüklendiğinde ikonları oluştur
-    lucide.createIcons();
+    // Sayfa yüklendiğinde ve lucide hazır olduğunda ikonları oluştur
+    if (window.lucide) {
+        lucide.createIcons();
+    } else {
+        // Eğer lucide hemen hazır değilse, bir gecikme ile tekrar dene
+        setTimeout(() => {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }, 100);
+    }
 });
