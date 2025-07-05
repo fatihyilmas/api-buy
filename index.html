@@ -44,9 +44,12 @@
                 <div class="grid md:grid-cols-2 gap-6">
                     <!-- Sol Sütun -->
                     <div class="space-y-6">
-                        <div class="relative">
-                            <i data-lucide="dollar-sign" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                            <input type="number" id="amount" name="amount" min="1" required placeholder="Bağış Miktarı (USD)" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        <div>
+                            <div class="relative">
+                                <i data-lucide="dollar-sign" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                                <input type="number" id="amount" name="amount" min="10" required placeholder="Bağış Miktarı (USD)" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2 pl-2">Minimum 10 USD</p>
                         </div>
                         <div id="currency-selector" class="grid grid-cols-2 gap-4">
                             <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition has-[:checked]:border-blue-500 has-[:checked]:ring-2 has-[:checked]:ring-blue-500">
@@ -54,10 +57,20 @@
                                 <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png" alt="TRX Logosu" class="w-6 h-6">
                                 <span class="font-semibold text-white">TRX</span>
                             </label>
-                             <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition has-[:checked]:border-blue-500 has-[:checked]:ring-2 has-[:checked]:ring-blue-500">
+                            <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition has-[:checked]:border-blue-500 has-[:checked]:ring-2 has-[:checked]:ring-blue-500">
                                 <input type="radio" name="currency" value="usdttrc20" class="hidden">
                                 <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/825.png" alt="USDT Logosu" class="w-6 h-6">
                                 <span class="font-semibold text-white">USDT</span>
+                            </label>
+                            <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition has-[:checked]:border-blue-500 has-[:checked]:ring-2 has-[:checked]:ring-blue-500">
+                                <input type="radio" name="currency" value="bnb" class="hidden">
+                                <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png" alt="BNB Logosu" class="w-6 h-6">
+                                <span class="font-semibold text-white">BNB</span>
+                            </label>
+                            <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition has-[:checked]:border-blue-500 has-[:checked]:ring-2 has-[:checked]:ring-blue-500">
+                                <input type="radio" name="currency" value="ltc" class="hidden">
+                                <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/2.png" alt="LTC Logosu" class="w-6 h-6">
+                                <span class="font-semibold text-white">LTC</span>
                             </label>
                         </div>
                         <!-- Submit Button (Buraya Taşındı) -->

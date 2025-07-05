@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Gerekli DOM elementlerini seç
     const donationForm = document.getElementById('donation-form');
+    const amountInput = document.getElementById('amount');
     const donateButton = document.getElementById('donate-button');
     const buttonText = document.getElementById('button-text');
     const buttonLoader = document.getElementById('button-loader');
@@ -18,6 +19,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyIcon = document.getElementById('copy-icon');
 
     let pollingInterval;
+
+    // Miktar alanından odak çıkınca minimum değeri kontrol et
+    amountInput.addEventListener('blur', () => {
+        const value = parseFloat(amountInput.value);
+        // Değer varsa ve 10'dan küçükse, 10'a ayarla
+        if (amountInput.value && value < 10) {
+            amountInput.value = 10;
+        }
+    });
 
     // Bağış formu gönderildiğinde
     donationForm.addEventListener('submit', async function(event) {
@@ -68,8 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // GÜNCELLENDİ: Daha esnek para birimi ve ağ adı yönetimi
         let currencySymbol = data.pay_currency.toUpperCase();
         if (currencySymbol === 'USDTTRC20') {
-            currencySymbol = 'USDT'; // Görünen adı basitleştir
+            currencySymbol = 'USDT';
+        } else if (currencySymbol === 'BNBBSC') { // NowPayments genellikle ağı bu şekilde belirtir
+            currencySymbol = 'BNB';
         }
+        // LTC için genellikle sadece 'LTC' döner, bu yüzden ekstra bir kontrole gerek yok.
         
         const networkName = data.network.toUpperCase();
 
