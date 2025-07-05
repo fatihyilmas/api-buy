@@ -258,7 +258,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const qrcodeDiv = document.getElementById('qrcode');
     const copyContainer = document.getElementById('copy-container');
     const copyIcon = document.getElementById('copy-icon');
-    const testSuccessButton = document.getElementById('test-success-button');
 
     let pollingInterval;
 
@@ -446,16 +445,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize I18n
     initI18n();
 
-    // Test button functionality
-    if (testSuccessButton) {
-        testSuccessButton.addEventListener('click', () => {
-            console.log('Test button clicked. Simulating successful payment.');
-            // Stop polling if it's running
-            if (pollingInterval) {
-                clearInterval(pollingInterval);
-            }
-            // Show the success message with test data
-            showSuccessMessage({ actually_paid: 1, price_currency: 'usd' });
-        });
-    }
+    // Sağ tıklama menüsünü engelle
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    });
 });
