@@ -10,10 +10,10 @@ module.exports = async (req, res) => {
     try {
         const response = await apiClient.get(`payment/${payment_id}`);
         
-        const { payment_status, pay_amount, pay_currency } = response.data;
+        const { payment_status, pay_amount, pay_currency, actually_paid, price_currency } = response.data;
 
         if (payment_status) {
-            res.status(200).json({ payment_status, pay_amount, pay_currency });
+            res.status(200).json({ payment_status, pay_amount, pay_currency, actually_paid, price_currency });
         } else {
             console.error('NOWPAYMENTS_CHECK_UNEXPECTED_RESPONSE:', response.data);
             res.status(500).json({ error: true, message: 'Ödeme durumu alınamadı.' });

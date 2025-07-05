@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "wallet_address": "Wallet Address",
             "waiting_for_payment": "Waiting for payment confirmation...",
             "thank_you": "Thank You!",
-            "donation_successful": "Your donation has been received successfully. Your support is very valuable to us.",
+            "donation_successful": "Your donation of {amount} {currency} has been successfully received. Your support is very valuable to us.",
             "address_copied": "Address copied to clipboard!",
             "copy_failed": "Failed to copy address."
         },
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "wallet_address": "Cüzdan Adresi",
             "waiting_for_payment": "Ödeme onayı bekleniyor...",
             "thank_you": "Teşekkürler!",
-            "donation_successful": "Bağışınız başarıyla alındı. Desteğiniz bizim için çok değerli.",
+            "donation_successful": "{amount} {currency} tutarındaki bağışınız başarıyla alındı. Desteğiniz bizim için çok değerli.",
             "address_copied": "Adres panoya kopyalandı!",
             "copy_failed": "Adres kopyalanamadı."
         }
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "wallet_address": "ウォレットアドレス",
         "waiting_for_payment": "支払いの確認を待っています...",
         "thank_you": "ありがとうございます！",
-        "donation_successful": "ご寄付は正常に受け付けられました。皆様のご支援に心より感謝申し上げます。",
+        "donation_successful": "{amount} {currency} のご寄付は正常に受け付けられました。皆様のご支援に心より感謝申し上げます。",
         "address_copied": "アドレスがクリップボードにコピーされました！",
         "copy_failed": "アドレスのコピーに失敗しました。"
     };
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "wallet_address": "عنوان المحفظة",
         "waiting_for_payment": "في انتظار تأكيد الدفع...",
         "thank_you": "شكرا لك!",
-        "donation_successful": "تم استلام تبرعك بنجاح. دعمكم قيم جدا لنا.",
+        "donation_successful": "تم استلام تبرعك بمبلغ {amount} {currency} بنجاح. دعمكم قيم جدا لنا.",
         "address_copied": "تم نسخ العنوان إلى الحافظة!",
         "copy_failed": "فشل نسخ العنوان."
     };
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "wallet_address": "Адрес кошелька",
         "waiting_for_payment": "Ожидание подтверждения платежа...",
         "thank_you": "Спасибо!",
-        "donation_successful": "Ваше пожертвование успешно получено. Ваша поддержка очень ценна для нас.",
+        "donation_successful": "Ваше пожертвование в размере {amount} {currency} успешно получено. Ваша поддержка очень ценна для нас.",
         "address_copied": "Адрес скопирован в буфер обмена!",
         "copy_failed": "Не удалось скопировать адрес."
     };
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "wallet_address": "Wallet-Adresse",
         "waiting_for_payment": "Warten auf Zahlungsbestätigung...",
         "thank_you": "Vielen Dank!",
-        "donation_successful": "Ihre Spende wurde erfolgreich empfangen. Ihre Unterstützung ist für uns sehr wertvoll.",
+        "donation_successful": "Ihre Spende in Höhe von {amount} {currency} wurde erfolgreich empfangen. Ihre Unterstützung ist für uns sehr wertvoll.",
         "address_copied": "Adresse in die Zwischenablage kopiert!",
         "copy_failed": "Adresse konnte nicht kopiert werden."
     };
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "wallet_address": "Dirección de la billetera",
         "waiting_for_payment": "Esperando la confirmación del pago...",
         "thank_you": "¡Gracias!",
-        "donation_successful": "Su donación ha sido recibida con éxito. Su apoyo es muy valioso para nosotros.",
+        "donation_successful": "Su donación de {amount} {currency} ha sido recibida con éxito. Su apoyo es muy valioso para nosotros.",
         "address_copied": "¡Dirección copiada al portapapeles!",
         "copy_failed": "Error al copiar la dirección."
     };
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "wallet_address": "Adresse du portefeuille",
         "waiting_for_payment": "En attente de la confirmation du paiement...",
         "thank_you": "Merci !",
-        "donation_successful": "Votre don a été reçu avec succès. Votre soutien nous est très précieux.",
+        "donation_successful": "Votre don de {amount} {currency} a été reçu avec succès. Votre soutien nous est très précieux.",
         "address_copied": "Adresse copiée dans le presse-papiers !",
         "copy_failed": "Échec de la copie de l'adresse."
     };
@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "wallet_address": "Endereço da carteira",
         "waiting_for_payment": "A aguardar a confirmação do pagamento...",
         "thank_you": "Obrigado!",
-        "donation_successful": "A sua doação foi recebida com sucesso. O seu apoio é muito valioso para nós.",
+        "donation_successful": "A sua doação de {amount} {currency} foi recebida com sucesso. O seu apoio é muito valioso para nós.",
         "address_copied": "Endereço copiado para a área de transferência!",
         "copy_failed": "Falha ao copiar o endereço."
     };
@@ -201,11 +201,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.querySelectorAll('[data-i18n-key]').forEach(element => {
             const key = element.getAttribute('data-i18n-key');
-            element.textContent = currentTranslations[key] || key;
+            if (currentTranslations[key]) {
+                 element.textContent = currentTranslations[key];
+            }
         });
         document.querySelectorAll('[data-i18n-placeholder-key]').forEach(element => {
             const key = element.getAttribute('data-i18n-placeholder-key');
-            element.placeholder = currentTranslations[key] || key;
+             if (currentTranslations[key]) {
+                element.placeholder = currentTranslations[key];
+            }
         });
     };
 
@@ -243,6 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const donationView = document.getElementById('donation-view');
     const paymentView = document.getElementById('payment-view');
     const successView = document.getElementById('success-view');
+    const successMessage = document.getElementById('success-message');
     const paymentNetwork = document.getElementById('payment-network');
     const paymentAmount = document.getElementById('payment-amount');
     const paymentAddress = document.getElementById('payment-address');
@@ -364,9 +369,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch(`/api/check-payment?payment_id=${paymentId}`);
                 const data = await response.json();
 
-                if (['finished', 'confirmed', 'sending'].includes(data.payment_status)) {
+                // Kısmi ödemeleri de kabul et
+                if (data.actually_paid > 0 && ['finished', 'confirmed', 'sending', 'partially_paid'].includes(data.payment_status)) {
                     clearInterval(pollingInterval);
-                    showSuccessMessage();
+                    showSuccessMessage(data);
                 }
             } catch (error) {
                 console.error('Error checking payment status:', error);
@@ -374,9 +380,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 10000);
     }
 
-    function showSuccessMessage() {
+    function showSuccessMessage(data) {
         paymentView.classList.add('hidden');
         successView.classList.remove('hidden');
+
+        const amount = data.actually_paid;
+        const currency = data.price_currency.toUpperCase();
+        
+        let message = currentTranslations['donation_successful'] || "Your donation of {amount} {currency} has been successfully received. Your support is very valuable to us.";
+        
+        successMessage.textContent = message.replace('{amount}', amount).replace('{currency}', currency);
 
         // 10 saniye sonra sayfayı yenileyerek ana forma dön
         setTimeout(() => {
@@ -422,8 +435,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (pollingInterval) {
                 clearInterval(pollingInterval);
             }
-            // Show the success message
-            showSuccessMessage();
+            // Show the success message with test data
+            showSuccessMessage({ actually_paid: 1, price_currency: 'usd' });
         });
     }
 });
