@@ -258,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const qrcodeDiv = document.getElementById('qrcode');
     const copyContainer = document.getElementById('copy-container');
     const copyIcon = document.getElementById('copy-icon');
+    const backToHomeButton = document.getElementById('back-to-home');
 
     let pollingInterval;
 
@@ -414,6 +415,10 @@ document.addEventListener('DOMContentLoaded', () => {
             location.reload();
         }, 10000);
     }
+
+    backToHomeButton.addEventListener('click', () => {
+        location.reload(); // Sayfayı yenileyerek ana forma dön
+    });
     
     function resetButton() {
         donateButton.disabled = false;
