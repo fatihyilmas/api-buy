@@ -79,8 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let currencySymbol = data.pay_currency.toUpperCase();
         if (currencySymbol === 'USDTTRC20') {
             currencySymbol = 'USDT';
-        } else if (currencySymbol === 'BNBBSC') { // NowPayments genellikle ağı bu şekilde belirtir
-            currencySymbol = 'BNB';
         }
         // LTC için genellikle sadece 'LTC' döner, bu yüzden ekstra bir kontrole gerek yok.
         
