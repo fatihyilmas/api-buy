@@ -24,7 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
             "thank_you": "Thank You!",
             "donation_successful": "Your donation of {amount} {currency} has been successfully received. Your support is very valuable to us.",
             "address_copied": "Address copied to clipboard!",
-            "copy_failed": "Failed to copy address."
+            "copy_failed": "Failed to copy address.",
+            "payment_failed": "Payment failed. Please try again.",
+            "payment_expired": "Payment expired. Please create a new one."
         },
         tr: {
             "support_project": "Projeyi Destekle",
@@ -44,7 +46,9 @@ document.addEventListener('DOMContentLoaded', () => {
             "thank_you": "Teşekkürler!",
             "donation_successful": "{amount} {currency} tutarındaki bağışınız başarıyla alındı. Desteğiniz bizim için çok değerli.",
             "address_copied": "Adres panoya kopyalandı!",
-            "copy_failed": "Adres kopyalanamadı."
+            "copy_failed": "Adres kopyalanamadı.",
+            "payment_failed": "Ödeme başarısız oldu. Lütfen tekrar deneyin.",
+            "payment_expired": "Ödeme süresi doldu. Lütfen yeni bir ödeme oluşturun."
         }
     };
 
@@ -369,13 +373,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch(`/api/check-payment?payment_id=${paymentId}`);
                 const data = await response.json();
 
-                // Kısmi ödemeleri de kabul et
-                if (data.actually_paid > 0 && ['finished', 'confirmed', 'sending', 'partially_paid'].includes(data.payment_status)) {
-                    clearInterval(pollingInterval);
-                    showSuccessMessage(data);
+                if (response.ok && !data.error) {
+                    // Başarılı ve kısmi ödemeleri kabul et
+                    if (data.actually_paid > 0 && ['finished', 'confirmed', 'sending', 'partially_paid'].includes(data.payment_status)) {
+                        clearInterval(pollingInterval);
+                        showSuccessMessage(data);
+                    }
+                    // Başarısız veya süresi dolmuş durumları ele al
+                    else if (['failed', 'expired'].includes(data.payment_status)) {
+                        clearInterval(pollingInterval);
+                        const messageKey = data.payment_status === 'failed' ? 'payment_failed' : 'payment_expired';
+                        showNotification(currentTranslations[messageKey], 'error');
+                        // 3 saniye sonra ana forma dön
+                        setTimeout(() => {
+                            location.reload();
+                        }, 3000);
+                    }
+                } else {
+                     showNotification(data.message || 'Error checking payment status.', 'error');
                 }
             } catch (error) {
                 console.error('Error checking payment status:', error);
+                // Polling'i durdurma, belki geçici bir ağ sorunudur.
             }
         }, 10000);
     }
