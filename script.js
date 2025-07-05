@@ -59,15 +59,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Ödeme detaylarını gösterme fonksiyonu
+    // GÜNCELLENDİ: Ödeme detaylarını gösterme fonksiyonu
     function displayPaymentDetails(data) {
         // Görünümleri değiştir
         donationView.classList.add('hidden');
         paymentView.classList.remove('hidden');
 
-        // Bilgileri doldur
-        paymentNetwork.textContent = data.network ? data.network.toUpperCase() : (data.pay_currency.includes('usdt') ? 'TRC-20' : 'TRON');
-        paymentAmount.textContent = `${data.pay_amount} ${data.pay_currency.toUpperCase()}`;
+        let currencySymbol = '';
+        let networkName = '';
+
+        // API'den gelen para birimi bilgisine göre sembolü ve ağ adını ayır
+        if (data.pay_currency.toLowerCase() === 'usdttrc20') {
+            currencySymbol = 'USDT';
+            networkName = 'TRC-20';
+        } else if (data.pay_currency.toLowerCase() === 'trx') {
+            currencySymbol = 'TRX';
+            networkName = 'TRON';
+        } else {
+            // Diğer olası para birimleri için varsayılan davranış
+            currencySymbol = data.pay_currency.toUpperCase();
+            networkName = data.network ? data.network.toUpperCase() : 'Bilinmiyor';
+        }
+
+        // Bilgileri doğru şekilde doldur
+        paymentNetwork.textContent = networkName;
+        paymentAmount.textContent = `${data.pay_amount} ${currencySymbol}`;
         paymentAddress.textContent = data.pay_address;
 
         // QR Kodu oluştur
@@ -81,24 +97,19 @@ document.addEventListener('DOMContentLoaded', () => {
         startPolling(data.payment_id);
     }
 
-    // GÜNCELLENDİ: Daha güvenilir kopyalama fonksiyonu
+    // Güvenilir kopyalama fonksiyonu
     function copyToClipboard(text) {
-        // Geçici bir textarea oluştur
         const textarea = document.createElement('textarea');
         textarea.value = text;
-        
-        // Görünmez yap ve DOM'a ekle
         textarea.style.position = 'absolute';
         textarea.style.left = '-9999px';
         document.body.appendChild(textarea);
         
-        // Metni seç ve kopyala
         textarea.select();
         try {
             document.execCommand('copy');
             showNotification('Adres panoya kopyalandı!');
             
-            // İkonu değiştir ve geri al
             copyIcon.removeAttribute('data-lucide');
             copyIcon.setAttribute('data-lucide', 'check');
             lucide.createIcons();
@@ -114,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
             showNotification('Adres kopyalanamadı.', 'error');
         }
         
-        // Geçici textarea'yı kaldır
         document.body.removeChild(textarea);
     }
 
@@ -139,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error('Ödeme durumu kontrol edilirken hata:', error);
             }
-        }, 10000); // Her 10 saniyede bir kontrol et
+        }, 10000);
     }
 
     // Başarı mesajını göster
