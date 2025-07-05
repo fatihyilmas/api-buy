@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startPolling(data.payment_id);
     }
 
-    // Güvenilir kopyalama fonksiyonu
+    // GÜNCELLENDİ: Güvenilir kopyalama fonksiyonu
     function copyToClipboard(text) {
         const textarea = document.createElement('textarea');
         textarea.value = text;
@@ -102,12 +102,11 @@ document.addEventListener('DOMContentLoaded', () => {
             document.execCommand('copy');
             showNotification('Adres panoya kopyalandı!');
             
-            copyIcon.removeAttribute('data-lucide');
+            // İkonu değiştir ve sonra lucide'ı çalıştır
             copyIcon.setAttribute('data-lucide', 'check');
             lucide.createIcons();
 
             setTimeout(() => {
-                copyIcon.removeAttribute('data-lucide');
                 copyIcon.setAttribute('data-lucide', 'copy');
                 lucide.createIcons();
             }, 2000);
@@ -115,9 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             console.error('Kopyalama başarısız oldu:', err);
             showNotification('Adres kopyalanamadı.', 'error');
+        } finally {
+            document.body.removeChild(textarea);
         }
-        
-        document.body.removeChild(textarea);
     }
 
     copyContainer.addEventListener('click', () => {
