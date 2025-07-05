@@ -20,14 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let pollingInterval;
 
-    // Miktar alanından odak çıkınca minimum değeri kontrol et
-    amountInput.addEventListener('blur', () => {
-        const value = parseFloat(amountInput.value);
-        // Değer varsa ve 10'dan küçükse, 10'a ayarla
-        if (amountInput.value && value < 10) {
-            amountInput.value = 10;
-        }
-    });
+    // Miktar alanındaki statik kontrol kaldırıldı. 
+    // Doğrulama artık dinamik olarak backend tarafından yapılıyor.
 
     // Bağış formu gönderildiğinde
     donationForm.addEventListener('submit', async function(event) {
@@ -49,22 +43,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/api/create-payment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amount, currency, email, message })
+                // Backend'in number tipinde beklediği amount değerini sayıya çevirerek gönder
+                body: JSON.stringify({ 
+                    amount: parseFloat(amount), 
+                    currency, 
+                    email, 
+                    message 
+                })
             });
 
             const data = await response.json();
 
-            if (response.ok) {
-                // Başarılı olursa ödeme detaylarını göster
+            // API'den gelen yanıta göre işlem yap
+            if (response.ok && !data.error) {
                 displayPaymentDetails(data);
             } else {
-                // Hata olursa bildir
-                showNotification(`Hata: ${data.message}`, 'error');
+                // API'den gelen özel hata mesajını göster
+                showNotification(data.message || 'Bir hata oluştu.', 'error');
                 resetButton();
             }
         } catch (error) {
-            console.error('Beklenmedik bir hata oluştu:', error);
-            showNotification('Beklenmedik bir hata oluştu.', 'error');
+            console.error('Ödeme oluşturma sırasında bir ağ hatası veya beklenmedik bir sorun oluştu:', error);
+            showNotification('Sunucuyla iletişim kurulamadı. Lütfen internet bağlantınızı kontrol edin.', 'error');
             resetButton();
         }
     });

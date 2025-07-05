@@ -1,53 +1,61 @@
-const axios = require('axios');
+const apiClient = require('./_lib/nowpayments');
+
+// Desteklenen para birimlerinin listesi
+const SUPPORTED_CURRENCIES = ['trx', 'usdttrc20', 'btc', 'ltc'];
 
 module.exports = async (req, res) => {
     if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Method Not Allowed' });
+        return res.status(405).json({ error: true, message: 'Yalnızca POST istekleri kabul edilir.' });
     }
 
     const { amount, currency, email, message } = req.body;
-    const NOWPAYMENTS_API_KEY = process.env.NOWPAYMENTS_API_KEY;
 
+    // Gelişmiş Doğrulama
     if (!amount || !currency) {
-        return res.status(400).json({ message: 'Amount and currency are required.' });
+        return res.status(400).json({ error: true, message: 'Miktar ve para birimi alanları zorunludur.' });
     }
-
-    if (!NOWPAYMENTS_API_KEY) {
-        return res.status(500).json({ message: 'API key is not configured.' });
+    if (typeof amount !== 'number' || amount < 10) {
+        return res.status(400).json({ error: true, message: 'Geçersiz miktar. Minimum 10 USD olmalıdır.' });
+    }
+    if (!SUPPORTED_CURRENCIES.includes(currency)) {
+        return res.status(400).json({ error: true, message: 'Seçilen para birimi desteklenmiyor.' });
+    }
+     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ error: true, message: 'Lütfen geçerli bir e-posta adresi girin.' });
     }
 
     try {
-        // We revert to the /payment endpoint to get a deposit address
-        const response = await axios.post('https://api.nowpayments.io/v1/payment', {
+        // 1. Adım: NowPayments'ten minimum ödeme miktarını kontrol et
+        const minAmountResponse = await apiClient.get(`min-amount?currency_from=${currency}&currency_to=usd`);
+        const minAmount = minAmountResponse.data.min_amount;
+
+        if (amount < minAmount) {
+            return res.status(400).json({ 
+                error: true, 
+                message: `Bu para birimi için minimum bağış tutarı ${minAmount} USD değerindedir.` 
+            });
+        }
+
+        // 2. Adım: Ödemeyi oluştur
+        const response = await apiClient.post('payment', {
             price_amount: amount,
             price_currency: 'usd',
-            pay_currency: currency, // Use the currency selected by the user
-            order_description: `Donation of ${amount} USD. From: ${email || 'Anonymous'}. Message: ${message || 'None'}`
-        }, {
-            headers: {
-                'x-api-key': NOWPAYMENTS_API_KEY,
-                'Content-Type': 'application/json'
-            }
+            pay_currency: currency,
+            order_description: `Bağış: ${amount} USD. Gönderen: ${email || 'Anonim'}. Mesaj: ${message || 'Yok'}`
         });
 
-        const { payment_id, pay_address, pay_amount, pay_currency, network } = response.data;
+        const paymentDetails = response.data;
 
-        if (payment_id && pay_address && pay_amount && pay_currency && network) {
-            res.status(200).json({
-                payment_id,
-                pay_address,
-                pay_amount,
-                pay_currency,
-                network,
-                email: email, // Pass back the email if provided
-                message: message // Pass back the message if provided
-            });
+        // Gelen verinin beklenen yapıda olduğunu kontrol et
+        if (paymentDetails && paymentDetails.payment_id) {
+            res.status(200).json(paymentDetails);
         } else {
-            console.error('NOWPAYMENTS_PAYMENT_ERROR:', response.data);
-            res.status(500).json({ message: 'Failed to get payment details from NowPayments.' });
+            console.error('NOWPAYMENTS_API_UNEXPECTED_RESPONSE:', paymentDetails);
+            res.status(500).json({ error: true, message: 'Ödeme oluşturulamadı. Lütfen daha sonra tekrar deneyin.' });
         }
     } catch (error) {
-        console.error('AXIOS_PAYMENT_ERROR:', error.response ? error.response.data : error.message);
-        res.status(500).json({ message: 'Failed to create payment due to an external error.' });
+        console.error('NOWPAYMENTS_CREATE_ERROR:', error.response ? error.response.data : error.message);
+        // Kullanıcıya daha genel bir hata mesajı göster
+        res.status(500).json({ error: true, message: 'Ödeme hizmetiyle iletişim kurulamadı. Lütfen daha sonra tekrar deneyin.' });
     }
 };

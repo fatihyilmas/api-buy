@@ -1,27 +1,25 @@
-const axios = require('axios');
+const apiClient = require('./_lib/nowpayments');
 
 module.exports = async (req, res) => {
     const { payment_id } = req.query;
-    const NOWPAYMENTS_API_KEY = process.env.NOWPAYMENTS_API_KEY;
 
     if (!payment_id) {
-        return res.status(400).json({ message: 'Payment ID is required.' });
-    }
-
-    if (!NOWPAYMENTS_API_KEY) {
-        return res.status(500).json({ message: 'API key is not configured.' });
+        return res.status(400).json({ error: true, message: 'Ödeme kimliği (payment_id) gereklidir.' });
     }
 
     try {
-        const response = await axios.get(`https://api.nowpayments.io/v1/payment/${payment_id}`, {
-            headers: {
-                'x-api-key': NOWPAYMENTS_API_KEY
-            }
-        });
+        const response = await apiClient.get(`payment/${payment_id}`);
+        
+        const { payment_status, pay_amount, pay_currency } = response.data;
 
-        res.status(200).json({ payment_status: response.data.payment_status });
+        if (payment_status) {
+            res.status(200).json({ payment_status, pay_amount, pay_currency });
+        } else {
+            console.error('NOWPAYMENTS_CHECK_UNEXPECTED_RESPONSE:', response.data);
+            res.status(500).json({ error: true, message: 'Ödeme durumu alınamadı.' });
+        }
     } catch (error) {
-        console.error('AXIOS_CHECK_PAYMENT_ERROR:', error.response ? error.response.data : error.message);
-        res.status(500).json({ message: 'Failed to check payment status.' });
+        console.error('NOWPAYMENTS_CHECK_ERROR:', error.response ? error.response.data : error.message);
+        res.status(500).json({ error: true, message: 'Ödeme durumu kontrol edilemedi.' });
     }
 };
