@@ -2,48 +2,72 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- I18N (Internationalization) Setup ---
     const supportedLangs = ['en', 'tr'];
     const defaultLang = 'en';
-    let translations = {};
+    let currentTranslations = {};
+
+    // Embed translations directly into the script
+    const translations = {
+        en: {
+            "support_project": "Support the Project",
+            "support_valuable": "Your support is very valuable for the development and sustainability of our project.",
+            "have_idea": "Have an Idea?",
+            "idea_description": "Want a new feature or have a suggestion? Let us know by adding your note in the 'Message' section. We prioritize developments based on these requests!",
+            "amount_placeholder": "Donation Amount (Min 10 USD)",
+            "email_placeholder": "E-mail (Optional)",
+            "message_placeholder": "Your Message (Optional)",
+            "donate_button": "Donate",
+            "button_creating": "Creating...",
+            "complete_payment": "Complete the Payment",
+            "network": "Network",
+            "amount": "Amount",
+            "wallet_address": "Wallet Address",
+            "waiting_for_payment": "Waiting for payment confirmation...",
+            "thank_you": "Thank You!",
+            "donation_successful": "Your donation has been received successfully. Your support is very valuable to us.",
+            "address_copied": "Address copied to clipboard!",
+            "copy_failed": "Failed to copy address."
+        },
+        tr: {
+            "support_project": "Projeyi Destekle",
+            "support_valuable": "Desteğiniz, projemizin geliştirilmesi ve sürdürülebilirliği için çok değerlidir.",
+            "have_idea": "Bir Fikrin mi Var?",
+            "idea_description": "Yeni bir özellik mi istiyorsunuz veya bir öneriniz mi var? 'Mesaj' bölümüne notunuzu ekleyerek bize bildirin. Geliştirmeleri bu isteklere göre önceliklendiriyoruz!",
+            "amount_placeholder": "Bağış Miktarı (Min 10 USD)",
+            "email_placeholder": "E-posta (İsteğe Bağlı)",
+            "message_placeholder": "Mesajınız (İsteğe Bağlı)",
+            "donate_button": "Bağış Yap",
+            "button_creating": "Oluşturuluyor...",
+            "complete_payment": "Ödemeyi Tamamlayın",
+            "network": "Ağ",
+            "amount": "Miktar",
+            "wallet_address": "Cüzdan Adresi",
+            "waiting_for_payment": "Ödeme onayı bekleniyor...",
+            "thank_you": "Teşekkürler!",
+            "donation_successful": "Bağışınız başarıyla alındı. Desteğiniz bizim için çok değerli.",
+            "address_copied": "Adres panoya kopyalandı!",
+            "copy_failed": "Adres kopyalanamadı."
+        }
+    };
 
     const languageSelector = document.getElementById('language-selector');
 
-    const applyTranslations = () => {
-        // Ensure translations are loaded
-        if (Object.keys(translations).length === 0) return;
+    const applyTranslations = (lang) => {
+        currentTranslations = translations[lang] || translations[defaultLang];
+        document.documentElement.lang = lang;
 
         document.querySelectorAll('[data-i18n-key]').forEach(element => {
             const key = element.getAttribute('data-i18n-key');
-            if (translations[key]) {
-                element.textContent = translations[key];
-            }
+            element.textContent = currentTranslations[key] || key;
         });
         document.querySelectorAll('[data-i18n-placeholder-key]').forEach(element => {
             const key = element.getAttribute('data-i18n-placeholder-key');
-            if (translations[key]) {
-                element.placeholder = translations[key];
-            }
+            element.placeholder = currentTranslations[key] || key;
         });
     };
 
-    const loadLanguage = async (lang) => {
-        try {
-            // Use a relative path for fetch
-            const response = await fetch(`./locales/${lang}.json`);
-            if (!response.ok) {
-                throw new Error(`Could not load ${lang}.json - Status: ${response.status}`);
-            }
-            translations = await response.json();
-            document.documentElement.lang = lang;
-            applyTranslations();
-            // Re-create icons in case any were added dynamically
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-        } catch (error) {
-            console.error('Failed to load language file:', error);
-            if (lang !== defaultLang) {
-                loadLanguage(defaultLang); // Fallback to default language
-            }
-        }
+    const setLanguage = (lang) => {
+        applyTranslations(lang);
+        languageSelector.value = lang;
+        localStorage.setItem('language', lang);
     };
 
     const initI18n = () => {
@@ -56,41 +80,33 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (supportedLangs.includes(browserLang)) {
             langToLoad = browserLang;
         }
-
-        languageSelector.value = langToLoad;
-        loadLanguage(langToLoad);
+        
+        setLanguage(langToLoad);
     };
 
     languageSelector.addEventListener('change', (e) => {
-        const selectedLang = e.target.value;
-        localStorage.setItem('language', selectedLang);
-        loadLanguage(selectedLang);
+        setLanguage(e.target.value);
     });
 
     // --- Application Logic ---
     
-    // Gerekli DOM elementlerini seç
     const donationForm = document.getElementById('donation-form');
     const amountInput = document.getElementById('amount');
     const donateButton = document.getElementById('donate-button');
     const buttonText = document.getElementById('button-text');
     const buttonLoader = document.getElementById('button-loader');
-
     const donationView = document.getElementById('donation-view');
     const paymentView = document.getElementById('payment-view');
     const successView = document.getElementById('success-view');
-
     const paymentNetwork = document.getElementById('payment-network');
     const paymentAmount = document.getElementById('payment-amount');
     const paymentAddress = document.getElementById('payment-address');
     const qrcodeDiv = document.getElementById('qrcode');
-    
     const copyContainer = document.getElementById('copy-container');
     const copyIcon = document.getElementById('copy-icon');
 
     let pollingInterval;
 
-    // Miktar alanından odak çıkınca minimum değeri kontrol et
     amountInput.addEventListener('blur', () => {
         const value = parseFloat(amountInput.value);
         if (amountInput.value && value < 10) {
@@ -98,12 +114,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Bağış formu gönderildiğinde
     donationForm.addEventListener('submit', async function(event) {
         event.preventDefault();
 
         donateButton.disabled = true;
-        buttonText.textContent = translations['button_creating'] || 'Creating...';
+        buttonText.textContent = currentTranslations['button_creating'];
         buttonLoader.classList.remove('hidden');
 
         const amount = document.getElementById('amount').value;
@@ -133,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Error creating payment:', error);
-            showNotification('Could not connect to the server. Please check your internet connection.', 'error');
+            showNotification('Could not connect to the server.', 'error');
             resetButton();
         }
     });
@@ -170,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             await navigator.clipboard.writeText(text);
-            showNotification(translations['address_copied'] || 'Address copied to clipboard!');
+            showNotification(currentTranslations['address_copied']);
 
             copyIcon.setAttribute('data-lucide', 'check');
             if (window.lucide) {
@@ -186,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (err) {
             console.error('Failed to copy:', err);
-            showNotification(translations['copy_failed'] || 'Failed to copy address.', 'error');
+            showNotification(currentTranslations['copy_failed'], 'error');
         }
     }
 
@@ -220,8 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function resetButton() {
         donateButton.disabled = false;
-        // Ensure translations are available before using them
-        buttonText.textContent = translations['donate_button'] || 'Donate';
+        buttonText.textContent = currentTranslations['donate_button'];
         buttonLoader.classList.add('hidden');
     }
 
