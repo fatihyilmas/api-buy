@@ -232,6 +232,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function showSuccessMessage() {
         paymentView.classList.add('hidden');
         successView.classList.remove('hidden');
+
+        // 10 saniye sonra sayfayı yenileyerek ana forma dön
+        setTimeout(() => {
+            location.reload();
+        }, 10000);
     }
     
     function resetButton() {
