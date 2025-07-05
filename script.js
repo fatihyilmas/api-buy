@@ -7,21 +7,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const languageSelector = document.getElementById('language-selector');
 
     const applyTranslations = () => {
+        // Ensure translations are loaded
+        if (Object.keys(translations).length === 0) return;
+
         document.querySelectorAll('[data-i18n-key]').forEach(element => {
             const key = element.getAttribute('data-i18n-key');
-            element.textContent = translations[key] || key;
+            if (translations[key]) {
+                element.textContent = translations[key];
+            }
         });
         document.querySelectorAll('[data-i18n-placeholder-key]').forEach(element => {
             const key = element.getAttribute('data-i18n-placeholder-key');
-            element.placeholder = translations[key] || key;
+            if (translations[key]) {
+                element.placeholder = translations[key];
+            }
         });
     };
 
     const loadLanguage = async (lang) => {
         try {
-            const response = await fetch(`locales/${lang}.json`);
+            // Use a relative path for fetch
+            const response = await fetch(`./locales/${lang}.json`);
             if (!response.ok) {
-                throw new Error(`Could not load ${lang}.json`);
+                throw new Error(`Could not load ${lang}.json - Status: ${response.status}`);
             }
             translations = await response.json();
             document.documentElement.lang = lang;
@@ -212,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function resetButton() {
         donateButton.disabled = false;
+        // Ensure translations are available before using them
         buttonText.textContent = translations['donate_button'] || 'Donate';
         buttonLoader.classList.add('hidden');
     }
