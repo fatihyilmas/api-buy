@@ -65,21 +65,13 @@ document.addEventListener('DOMContentLoaded', () => {
         donationView.classList.add('hidden');
         paymentView.classList.remove('hidden');
 
-        let currencySymbol = '';
-        let networkName = '';
-
-        // API'den gelen para birimi bilgisine göre sembolü ve ağ adını ayır
-        if (data.pay_currency.toLowerCase() === 'usdttrc20') {
-            currencySymbol = 'USDT';
-            networkName = 'TRC-20';
-        } else if (data.pay_currency.toLowerCase() === 'trx') {
-            currencySymbol = 'TRX';
-            networkName = 'TRON';
-        } else {
-            // Diğer olası para birimleri için varsayılan davranış
-            currencySymbol = data.pay_currency.toUpperCase();
-            networkName = data.network ? data.network.toUpperCase() : 'Bilinmiyor';
+        // GÜNCELLENDİ: Daha esnek para birimi ve ağ adı yönetimi
+        let currencySymbol = data.pay_currency.toUpperCase();
+        if (currencySymbol === 'USDTTRC20') {
+            currencySymbol = 'USDT'; // Görünen adı basitleştir
         }
+        
+        const networkName = data.network.toUpperCase();
 
         // Bilgileri doğru şekilde doldur
         paymentNetwork.textContent = networkName;
