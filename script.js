@@ -240,9 +240,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const donationForm = document.getElementById('donation-form');
     const amountInput = document.getElementById('amount');
-    const donateButton = document.getElementById('donate-button');
-    const buttonText = document.getElementById('button-text');
-    const buttonLoader = document.getElementById('button-loader');
+    const donateButtonLabel = document.getElementById('donate-button-label'); // The label wrapping the actual button
+    const actualDonateButton = document.getElementById('donate-button'); // The hidden button inside the label
+    const buttonText = document.getElementById('button-text-display'); // The span for displaying text
+    const buttonLoader = document.getElementById('button-loader-display'); // The div for displaying loader
     const donationView = document.getElementById('donation-view');
     const paymentView = document.getElementById('payment-view');
     const successView = document.getElementById('success-view');
@@ -267,7 +268,8 @@ document.addEventListener('DOMContentLoaded', () => {
     donationForm.addEventListener('submit', async function(event) {
         event.preventDefault();
 
-        donateButton.disabled = true;
+        actualDonateButton.disabled = true; // Disable the actual button
+        donateButtonLabel.classList.add('disabled'); // Add a class to visually indicate disabled state if needed
         buttonText.textContent = currentTranslations['button_creating'];
         buttonLoader.classList.remove('hidden');
 
@@ -411,7 +413,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     function resetButton() {
-        donateButton.disabled = false;
+        actualDonateButton.disabled = false;
+        donateButtonLabel.classList.remove('disabled');
         buttonText.textContent = currentTranslations['donate_button'];
         buttonLoader.classList.add('hidden');
     }
@@ -481,8 +484,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sayfa yüklendiğinde başlangıç durumunu ayarla
     handleCurrencySelection();
-    
-    // --- ESKİ KOD DEVAM EDİYOR ---
+
+    // Add event listener for the donate button label to trigger the hidden button's click
+    donateButtonLabel.addEventListener('click', () => {
+        if (!actualDonateButton.disabled) {
+            actualDonateButton.click();
+        }
+    });
 
     // Initialize I18n
     initI18n();
