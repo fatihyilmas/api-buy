@@ -58,8 +58,10 @@ class handler(BaseHTTPRequestHandler):
             self._send_response(500, {'error': True, 'message': 'Server configuration error: Business logic could not be loaded. Check decryption key.'})
             return
         
+        # Gerekli ortam değişkenlerini bir sözlükte topla ve deşifre edilmiş koda aktar
         env = {
-            "NOWPAYMENTS_API_KEY": os.environ.get('NOWPAYMENTS_API_KEY')
+            "API_KEY": os.environ.get('API_KEY'), # Genel bir isim kullan
+            "BASE_URL": os.environ.get('BASE_URL') # Genel bir isim kullan
         }
         
         local_scope = {'request_handler': self, 'env': env}
