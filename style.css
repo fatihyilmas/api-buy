@@ -1,25 +1,193 @@
-/* Not: Ana stiller, daha esnek ve modern bir yaklaşım olan Tailwind CSS 
-  kullanılarak doğrudan HTML içerisindeki sınıflar (classes) ile yönetilmektedir.
-  Bu CSS dosyası, yalnızca Tailwind ile yapılamayan veya özel olarak
-  belirtilmesi gereken eklemeler için kullanılır.
-*/
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Donation Platform</title>
+    <meta name="description" content="Support our project by making a secure crypto donation. We accept various cryptocurrencies like BTC, ETH, USDT, and more. Your contribution helps us grow and continue our work.">
+    <meta name="keywords" content="crypto donation, support project, cryptocurrency, blockchain, donate crypto, BTC, ETH, USDT, TRX, LTC">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💖</text></svg>">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@0.378.0/dist/umd/lucide.js"></script>
+    <!-- Custom Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-900 font-sans p-4 md:p-8">
 
-body {
-    font-family: 'Inter', sans-serif;
-    /* Arka plan rengi ve diğer temel stiller artık doğrudan 
-       body etiketinde Tailwind sınıfları ile ayarlanıyor. */
-}
+    <div id="app-container" class="w-full max-w-5xl mx-auto">
+        <!-- Donation Form View -->
+        <div id="donation-view" class="transition-all duration-500">
+            <!-- Başlık Alanı -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-white flex items-center justify-center space-x-3">
+                    <span class="text-red-400 animate-pulse">💖</span>
+                    <span data-i18n-key="support_project">Support the Project</span>
+                    <span class="text-red-400 animate-pulse" style="animation-delay: 0.2s;">💖</span>
+                </h1>
+                <p class="text-gray-400 mt-2 max-w-xl mx-auto" data-i18n-key="support_valuable">Your support is very valuable for the development and sustainability of our project.</p>
+            </div>
 
-/* Form elemanlarına tıklandığında (focus) tarayıcının varsayılan olarak 
-  eklediği dış çerçeveyi (outline) kaldırıyoruz. */
-input:focus, select:focus, textarea:focus, button:focus {
-    outline: none;
-}
+            <!-- Fikir Kutusu -->
+            <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 mb-8 max-w-3xl mx-auto flex items-start space-x-4">
+                <i data-lucide="lightbulb" class="w-8 h-8 text-yellow-400 flex-shrink-0 mt-1"></i>
+                <div>
+                    <h3 class="font-semibold text-white" data-i18n-key="have_idea">Have an Idea?</h3>
+                    <p class="text-gray-400 text-sm mt-1" data-i18n-key="idea_description">Want a new feature or have a suggestion? Let us know by adding your note in the 'Message' section. We prioritize developments based on these requests!</p>
+                </div>
+            </div>
+            
+            <!-- Form ve Buton Yerleşimi -->
+            <form id="donation-form" class="max-w-3xl mx-auto">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Sol Sütun -->
+                    <div class="space-y-6">
+                        <div>
+                            <div class="relative">
+                                <i data-lucide="dollar-sign" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                                <input type="number" id="amount" name="amount" min="10" required data-i18n-placeholder-key="amount_placeholder" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                            </div>
+                        </div>
+                        <div id="currency-selector" class="grid grid-cols-2 gap-4">
+                            <!-- DEĞİŞİKLİK: 'has-[:checked]' sınıfları kaldırıldı ve 'selection-indicator' eklendi -->
+                            <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition">
+                                <input type="radio" name="currency" value="trx" class="hidden">
+                                <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png" alt="TRX Logosu" class="w-6 h-6">
+                                <span class="font-semibold text-white">TRX</span>
+                                <div class="selection-indicator ml-auto"></div>
+                            </label>
+                            <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition">
+                                <input type="radio" name="currency" value="usdttrc20" class="hidden" checked>
+                                <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/825.png" alt="USDT Logosu" class="w-6 h-6">
+                                <span class="font-semibold text-white">USDT</span>
+                                <div class="selection-indicator ml-auto"></div>
+                            </label>
+                            <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition">
+                                <input type="radio" name="currency" value="btc" class="hidden">
+                                <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1.png" alt="BTC Logosu" class="w-6 h-6">
+                                <span class="font-semibold text-white">BTC</span>
+                                <div class="selection-indicator ml-auto"></div>
+                            </label>
+                            <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition">
+                                <input type="radio" name="currency" value="ltc" class="hidden">
+                                <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/2.png" alt="LTC Logosu" class="w-6 h-6">
+                                <span class="font-semibold text-white">LTC</span>
+                                <div class="selection-indicator ml-auto"></div>
+                            </label>
+                        </div>
+                        <!-- Submit Button & Language Selector -->
+                        <div class="flex items-center gap-4">
+                            <button type="submit" id="donate-button" class="flex-grow bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all duration-300 flex items-center justify-center space-x-2 disabled:bg-gray-500 disabled:cursor-not-allowed">
+                                <span id="button-text" data-i18n-key="donate_button">Donate</span>
+                                <div id="button-loader" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin hidden"></div>
+                            </button>
+                            <div class="relative">
+                                <i data-lucide="globe" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"></i>
+                                <select id="language-selector" class="bg-gray-800 border border-gray-700 text-white rounded-xl py-3 pl-10 pr-4 appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition cursor-pointer">
+                                    <option value="ar">عربي</option>
+                                    <option value="de">Deutsch</option>
+                                    <option value="en">English</option>
+                                    <option value="es">Español</option>
+                                    <option value="fr">Français</option>
+                                    <option value="ja">日本語</option>
+                                    <option value="pt">Português</option>
+                                    <option value="ru">Русский</option>
+                                    <option value="tr">Türkçe</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Sağ Sütun -->
+                    <div class="space-y-6">
+                        <div class="relative">
+                             <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                            <input type="email" id="email" name="email" data-i18n-placeholder-key="email_placeholder" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+                        <div class="relative">
+                            <i data-lucide="message-square" class="absolute left-4 top-4 w-5 h-5 text-gray-400"></i>
+                            <textarea id="message" name="message" data-i18n-placeholder-key="message_placeholder" class="w-full h-40 bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
 
-/* QR kodunu içeren <img> etiketine özel stil. */
-#qrcode img {
-    border-radius: 0.75rem; /* rounded-xl */
-    width: 160px;
-    height: 160px;
-    border: 4px solid #374151; /* border-gray-700 */
-}
+        <!-- Yatay Ödeme Sayfası -->
+        <div id="payment-view" class="hidden">
+            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 max-w-3xl mx-auto">
+                <div class="relative mb-6">
+                    <h2 class="text-2xl font-bold text-white text-center" data-i18n-key="complete_payment">Complete the Payment</h2>
+                    <button id="back-to-home" class="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition">
+                        <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+                    <!-- Sol Sütun: QR Kod -->
+                    <div class="flex-shrink-0">
+                        <div id="qrcode" class="bg-white p-4 rounded-xl inline-block border-4 border-gray-700"></div>
+                    </div>
+                    <!-- Sağ Sütun: Detaylar -->
+                    <div class="flex-1 w-full space-y-4 text-left">
+                        <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400 font-medium" data-i18n-key="network">Network</span>
+                                <span id="payment-network" class="text-white font-semibold"></span>
+                            </div>
+                        </div>
+                        <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400 font-medium" data-i18n-key="amount">Amount</span>
+                                <span id="payment-amount" class="text-white font-semibold"></span>
+                            </div>
+                        </div>
+                        <div id="copy-container" class="bg-gray-900 p-4 rounded-xl border border-gray-700 cursor-pointer hover:border-blue-500 transition group">
+                            <div class="flex justify-between items-center">
+                                <div class="flex-1 min-w-0 text-center">
+                                    <span class="text-gray-400 font-medium block" data-i18n-key="wallet_address">Wallet Address</span>
+                                    <span id="payment-address" class="text-white font-semibold break-all"></span>
+                                </div>
+                                <div class="pl-3 text-gray-400 group-hover:text-white transition">
+                                    <i id="copy-icon" data-lucide="copy" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="mt-6 flex items-center justify-center space-x-3 text-blue-400">
+                            <div class="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                            <span data-i18n-key="waiting_for_payment">Waiting for payment confirmation...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success View -->
+        <div id="success-view" class="hidden">
+             <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 text-center max-w-md mx-auto">
+                <div class="bg-green-500/10 p-4 rounded-full inline-block mb-4">
+                    <i data-lucide="check-circle-2" class="w-16 h-16 text-green-400"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-white" data-i18n-key="thank_you">Thank You!</h2>
+                <p id="success-message" class="text-gray-400 mt-2" data-i18n-key="donation_successful">Your donation has been received successfully. Your support is very valuable to us.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Element -->
+    <div id="notification" class="fixed bottom-5 right-5 bg-green-500 text-white py-3 px-6 rounded-xl shadow-lg translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-3">
+        <i data-lucide="check-circle" class="w-6 h-6"></i>
+        <span id="notification-message"></span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.js"></script>
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
