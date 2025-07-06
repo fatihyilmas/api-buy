@@ -134,9 +134,9 @@ class handler(BaseHTTPRequestHandler):
         self.process_request()
 
     def process_request(self):
-        # Python API'leri için standartlaştırılmış ortam değişkeni adlarını kullan
-        encrypted_logic = os.environ.get('ENCRYPTED_PYTHON_LOGIC')
-        decryption_key = os.environ.get('DECRYPTION_KEY_PYTHON')
+        # Vercel'deki mevcut değişken adlarıyla eşleşmesi için geri değiştirildi
+        encrypted_logic = os.environ.get('ENCRYPTED_LOGIC')
+        decryption_key = os.environ.get('DECRYPTION_KEY')
 
         if not all([encrypted_logic, decryption_key]):
             self._send_response(500, {'error': True, 'message': 'Server configuration error: Missing encryption keys.'})
