@@ -1,50 +1,66 @@
-const apiClient = require('./_lib/nowpayments');
+const crypto = require('crypto');
 
-// Desteklenen para birimlerinin listesi
-const SUPPORTED_CURRENCIES = ['trx', 'usdttrc20', 'btc', 'ltc'];
+function deriveKey(secret, salt, iterations, keylen, digest) {
+    return crypto.pbkdf2Sync(secret, salt, iterations, keylen, digest);
+}
+
+function decrypt(encryptedText, secret) {
+    if (!encryptedText || !secret) {
+        return "";
+    }
+    try {
+        const data = Buffer.from(encryptedText, 'base64');
+        const iv = data.slice(0, 12);
+        const tag = data.slice(12, 28);
+        const ciphertext = data.slice(28);
+
+        const SALT = Buffer.from('jbot_salt_v1');
+        const ITERATIONS = 100000;
+        const KEY_LENGTH = 32;
+
+        const key = deriveKey(secret, SALT, ITERATIONS, KEY_LENGTH, 'sha256');
+
+        const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+        decipher.setAuthTag(tag);
+
+        let decrypted = decipher.update(ciphertext, 'buffer', 'utf8');
+        decrypted += decipher.final('utf8');
+        return decrypted;
+    } catch (e) {
+        console.error("Decryption failed:", e.message);
+        return "";
+    }
+}
+
+const ENCRYPTED_LOGIC = process.env.ENCRYPTED_LOGIC;
+const DECRYPTION_KEY = process.env.DECRYPTION_KEY;
+
+let decryptedLogic = null;
+
+if (ENCRYPTED_LOGIC && DECRYPTION_KEY) {
+    decryptedLogic = decrypt(ENCRYPTED_LOGIC, DECRYPTION_KEY);
+    if (!decryptedLogic) {
+        console.error("ERROR: Decrypted logic is empty. Check ENCRYPTED_LOGIC and DECRYPTION_KEY.");
+    }
+} else {
+    console.error("ERROR: ENCRYPTED_LOGIC or DECRYPTION_KEY environment variables are missing.");
+}
+
+const executeBusinessLogic = decryptedLogic ? new Function('req', 'res', 'env', decryptedLogic) : null;
 
 module.exports = async (req, res) => {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: true, message: 'Yalnızca POST istekleri kabul edilir.' });
+    if (!executeBusinessLogic) {
+        return res.status(500).json({ error: true, message: 'Sunucu yapılandırma hatası: İş mantığı yüklenemedi.' });
     }
 
-    const { amount, currency, email, message } = req.body;
-
-    // Gelişmiş Doğrulama
-    if (!amount || !currency) {
-        return res.status(400).json({ error: true, message: 'Miktar ve para birimi alanları zorunludur.' });
-    }
-    if (typeof amount !== 'number' || amount < 10) {
-        return res.status(400).json({ error: true, message: 'Geçersiz miktar. Minimum 10 USD olmalıdır.' });
-    }
-    if (!SUPPORTED_CURRENCIES.includes(currency)) {
-        return res.status(400).json({ error: true, message: 'Seçilen para birimi desteklenmiyor.' });
-    }
-     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return res.status(400).json({ error: true, message: 'Lütfen geçerli bir e-posta adresi girin.' });
-    }
+    const env = {
+        NOWPAYMENTS_API_KEY: process.env.NOWPAYMENTS_API_KEY
+    };
 
     try {
-        // Dinamik minimum tutar kontrolü kaldırıldı.
-        const response = await apiClient.post('payment', {
-            price_amount: amount,
-            price_currency: 'usd',
-            pay_currency: currency,
-            order_description: `Bağış: ${amount} USD. Gönderen: ${email || 'Anonim'}. Mesaj: ${message || 'Yok'}`
-        });
-
-        const paymentDetails = response.data;
-
-        // Gelen verinin beklenen yapıda olduğunu kontrol et
-        if (paymentDetails && paymentDetails.payment_id) {
-            res.status(200).json(paymentDetails);
-        } else {
-            console.error('NOWPAYMENTS_API_UNEXPECTED_RESPONSE:', paymentDetails);
-            res.status(500).json({ error: true, message: 'Ödeme oluşturulamadı. Lütfen daha sonra tekrar deneyin.' });
-        }
+        await executeBusinessLogic(req, res, env);
     } catch (error) {
-        console.error('NOWPAYMENTS_CREATE_ERROR:', error.response ? error.response.data : error.message);
-        // Kullanıcıya daha genel bir hata mesajı göster
-        res.status(500).json({ error: true, message: 'Ödeme hizmetiyle iletişim kurulamadı. Lütfen daha sonra tekrar deneyin.' });
+        console.error('BUSINESS_LOGIC_EXECUTION_ERROR:', error);
+        return res.status(500).json({ error: true, message: 'Dahili sunucu hatası.' });
     }
 };
