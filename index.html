@@ -53,8 +53,8 @@
                                 <input type="number" id="amount" name="amount" min="10" required data-i18n-placeholder-key="amount_placeholder" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                             </div>
                         </div>
-                        <div id="currency-selector" class="grid grid-cols-2 gap-4">
-                            <!-- DEĞİŞİKLİK: 'has-[:checked]' sınıfları kaldırıldı ve 'selection-indicator' eklendi -->
+                        <div id="controls-grid" class="grid grid-cols-2 gap-4">
+                            <!-- Kripto Para Seçenekleri -->
                             <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition">
                                 <input type="radio" name="currency" value="trx" class="hidden">
                                 <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png" alt="TRX Logosu" class="w-6 h-6">
@@ -79,16 +79,11 @@
                                 <span class="font-semibold text-white">LTC</span>
                                 <div class="selection-indicator ml-auto"></div>
                             </label>
-                        </div>
-                        <!-- Submit Button & Language Selector -->
-                        <div class="flex items-center gap-4">
-                            <button type="submit" id="donate-button" class="flex-grow bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all duration-300 flex items-center justify-center space-x-2 disabled:bg-gray-500 disabled:cursor-not-allowed">
-                                <span id="button-text" data-i18n-key="donate_button">Donate</span>
-                                <div id="button-loader" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin hidden"></div>
-                            </button>
+
+                            <!-- Dil Seçici -->
                             <div class="relative">
-                                <i data-lucide="globe" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"></i>
-                                <select id="language-selector" class="bg-gray-800 border border-gray-700 text-white rounded-xl py-3 pl-10 pr-4 appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition cursor-pointer">
+                                <i data-lucide="globe" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10"></i>
+                                <select id="language-selector" class="w-full h-full bg-gray-900 border border-gray-700 text-white rounded-xl p-4 pl-12 appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition cursor-pointer hover:border-blue-500">
                                     <option value="ar">عربي</option>
                                     <option value="de">Deutsch</option>
                                     <option value="en">English</option>
@@ -99,18 +94,25 @@
                                     <option value="ru">Русский</option>
                                     <option value="tr">Türkçe</option>
                                 </select>
+                                <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"></i>
                             </div>
+
+                            <!-- Bağış Butonu -->
+                            <button type="submit" id="donate-button" class="w-full h-full bg-blue-600 text-white font-bold p-4 rounded-xl hover:bg-blue-700 transition-all duration-300 flex items-center justify-center space-x-2 disabled:bg-gray-500 disabled:cursor-not-allowed">
+                                <span id="button-text" data-i18n-key="donate_button">Donate</span>
+                                <div id="button-loader" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin hidden"></div>
+                            </button>
                         </div>
                     </div>
-                    <!-- Sağ Sütun -->
-                    <div class="space-y-6">
+                    <!-- Sağ Sütun (DEĞİŞTİRİLDİ) -->
+                    <div class="flex flex-col gap-6">
                         <div class="relative">
                              <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
                             <input type="email" id="email" name="email" data-i18n-placeholder-key="email_placeholder" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                         </div>
-                        <div class="relative">
+                        <div class="relative flex-grow">
                             <i data-lucide="message-square" class="absolute left-4 top-4 w-5 h-5 text-gray-400"></i>
-                            <textarea id="message" name="message" data-i18n-placeholder-key="message_placeholder" class="w-full h-40 bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"></textarea>
+                            <textarea id="message" name="message" data-i18n-placeholder-key="message_placeholder" class="w-full h-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"></textarea>
                         </div>
                     </div>
                 </div>
