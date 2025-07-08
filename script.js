@@ -281,16 +281,18 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             amountCurrencyIcon.setAttribute('data-lucide', 'hash');
             try {
-                const response = await fetch(`/api/get-min-amount?currency_from=${currency}`);
+                // YENİ: 10 USD'nin kripto karşılığını almak için /get-estimated-price endpoint'ini kullan
+                const response = await fetch(`/api/get-estimated-price?amount=10&currency_from=usd&currency_to=${currency}`);
                 const data = await response.json();
-                if (response.ok && data.min_amount) {
-                    let minAmount = parseFloat(data.min_amount) * 1.05; // %5 marj ekle
-                    const roundedMinAmount = roundToSignificantDigits(minAmount, 3); // 3 anlamlı basamağa yuvarla
+                if (response.ok && data.estimated_amount) {
+                    let estimatedAmount = parseFloat(data.estimated_amount);
+                    // API'den gelen değere küçük bir marj ekleyip yuvarla
+                    const finalAmount = roundToSignificantDigits(estimatedAmount * 1.01, 3); 
 
-                    currentMinAmount = roundedMinAmount;
-                    amountInput.value = roundedMinAmount;
-                    amountInput.min = roundedMinAmount;
-                    amountInput.placeholder = `Min ${roundedMinAmount} ${currency.toUpperCase()}`;
+                    currentMinAmount = finalAmount;
+                    amountInput.value = finalAmount;
+                    amountInput.min = finalAmount;
+                    amountInput.placeholder = `Min ${finalAmount} ${currency.toUpperCase()}`;
                 } else {
                     // Hata durumunda varsayılan 10 USD'ye dön
                     amountInput.min = 10;
