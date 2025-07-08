@@ -43,18 +43,27 @@
             </div>
             
             <!-- Form ve Buton Yerleşimi -->
-            <form id="donation-form" class="max-w-3xl mx-auto">
-                <div class="grid md:grid-cols-2 gap-6">
-                    <!-- Sol Sütun -->
-                    <div class="space-y-6">
-                        <div>
-                            <div class="relative">
-                                <i data-lucide="dollar-sign" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                                <input type="number" id="amount" name="amount" min="10" required data-i18n-placeholder-key="amount_placeholder" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
-                            </div>
+            <form id="donation-form" class="max-w-3xl mx-auto space-y-6">
+                <div class="space-y-6">
+                    <!-- Row 1: Amount, Min Amount, Email -->
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="relative">
+                            <i data-lucide="dollar-sign" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                            <input type="number" id="amount" name="amount" min="10" required data-i18n-placeholder-key="amount_placeholder_new" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                         </div>
+                        <div id="min-amount-display" class="relative bg-gray-900 border border-gray-700 text-gray-400 rounded-xl py-3 px-4 flex items-center">
+                            <i data-lucide="info" class="w-5 h-5 text-gray-400 mr-3 flex-shrink-0"></i>
+                            <span id="min-amount-text" class="text-sm" data-i18n-key="min_amount_default">Min: 10 USD</span>
+                        </div>
+                        <div class="relative">
+                            <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                            <input type="email" id="email" name="email" data-i18n-placeholder-key="email_placeholder" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Currency Selector & Message -->
+                    <div class="grid md:grid-cols-2 gap-6">
                         <div id="currency-selector" class="grid grid-cols-2 gap-4">
-                            <!-- DEĞİŞİKLİK: 'has-[:checked]' sınıfları kaldırıldı ve 'selection-indicator' eklendi -->
                             <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition">
                                 <input type="radio" name="currency" value="trx" class="hidden">
                                 <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png" alt="TRX Logosu" class="w-6 h-6">
@@ -80,42 +89,33 @@
                                 <div class="selection-indicator ml-auto"></div>
                             </label>
                         </div>
-                        <!-- Submit Button & Language Selector -->
-                        <div class="grid grid-cols-2 gap-4">
-                            <label id="donate-button-label" class="currency-option bg-blue-600 text-white font-bold rounded-xl p-4 cursor-pointer flex items-center justify-center space-x-3 hover:bg-blue-700 transition-all duration-300">
-                                <button type="submit" id="donate-button" class="hidden">
-                                    <span id="button-text" data-i18n-key="donate_button">Donate</span>
-                                    <div id="button-loader" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin hidden"></div>
-                                </button>
-                                <span id="button-text-display" data-i18n-key="donate_button">Donate</span>
-                                <div id="button-loader-display" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin hidden"></div>
-                            </label>
-                            <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition">
-                                <i data-lucide="globe" class="w-6 h-6 text-gray-400"></i>
-                                <select id="language-selector" class="flex-grow bg-transparent border-none text-white outline-none cursor-pointer appearance-none">
-                                    <option value="ar">عربي</option>
-                                    <option value="de">Deutsch</option>
-                                    <option value="en">English</option>
-                                    <option value="es">Español</option>
-                                    <option value="fr">Français</option>
-                                    <option value="ja">日本語</option>
-                                    <option value="pt">Português</option>
-                                    <option value="ru">Русский</option>
-                                    <option value="tr">Türkçe</option>
-                                </select>
-                            </label>
-                        </div>
-                    </div>
-                    <!-- Sağ Sütun -->
-                    <div class="space-y-6">
-                        <div class="relative">
-                             <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                            <input type="email" id="email" name="email" data-i18n-placeholder-key="email_placeholder" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
-                        </div>
                         <div class="relative">
                             <i data-lucide="message-square" class="absolute left-4 top-4 w-5 h-5 text-gray-400"></i>
-                            <textarea id="message" name="message" data-i18n-placeholder-key="message_placeholder" class="w-full h-56 bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"></textarea>
+                            <textarea id="message" name="message" data-i18n-placeholder-key="message_placeholder" class="w-full h-full min-h-[150px] bg-gray-900 border border-gray-700 text-white rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"></textarea>
                         </div>
+                    </div>
+
+                    <!-- Row 3: Donate Button & Language Selector -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <label id="donate-button-label" class="currency-option bg-blue-600 text-white font-bold rounded-xl p-4 cursor-pointer flex items-center justify-center space-x-3 hover:bg-blue-700 transition-all duration-300">
+                            <button type="submit" id="donate-button" class="hidden"></button>
+                            <span id="button-text-display" data-i18n-key="donate_button">Donate</span>
+                            <div id="button-loader-display" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin hidden"></div>
+                        </label>
+                        <label class="currency-option bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer flex items-center space-x-3 hover:border-blue-500 transition">
+                            <i data-lucide="globe" class="w-6 h-6 text-gray-400"></i>
+                            <select id="language-selector" class="flex-grow bg-transparent border-none text-white outline-none cursor-pointer appearance-none">
+                                <option value="ar">عربي</option>
+                                <option value="de">Deutsch</option>
+                                <option value="en">English</option>
+                                <option value="es">Español</option>
+                                <option value="fr">Français</option>
+                                <option value="ja">日本語</option>
+                                <option value="pt">Português</option>
+                                <option value="ru">Русский</option>
+                                <option value="tr">Türkçe</option>
+                            </select>
+                        </label>
                     </div>
                 </div>
             </form>

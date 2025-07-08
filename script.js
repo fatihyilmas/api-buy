@@ -11,7 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
             "support_valuable": "Your support is very valuable for the development and sustainability of our project.",
             "have_idea": "Have an Idea?",
             "idea_description": "Want a new feature or have a suggestion? Let us know by adding your note in the 'Message' section. We prioritize developments based on these requests!",
-            "amount_placeholder": "Donation Amount (Min 10 USD)",
+            "amount_placeholder_new": "Donation Amount",
+            "min_amount_default": "Min: 10 USD",
+            "min_amount_loading": "Calculating...",
+            "min_amount_error": "Error",
+            "min_amount_format": "Min: {amount} {currency}",
             "email_placeholder": "E-mail (Optional)",
             "message_placeholder": "Your Message (Optional)",
             "donate_button": "Donate",
@@ -33,7 +37,11 @@ document.addEventListener('DOMContentLoaded', () => {
             "support_valuable": "Desteğiniz, projemizin geliştirilmesi ve sürdürülebilirliği için çok değerlidir.",
             "have_idea": "Bir Fikrin mi Var?",
             "idea_description": "Yeni bir özellik mi istiyorsunuz veya bir öneriniz mi var? 'Mesaj' bölümüne notunuzu ekleyerek bize bildirin. Geliştirmeleri bu isteklere göre önceliklendiriyoruz!",
-            "amount_placeholder": "Bağış Miktarı (Min 10 USD)",
+            "amount_placeholder_new": "Bağış Miktarı",
+            "min_amount_default": "Min: 10 USD",
+            "min_amount_loading": "Hesaplanıyor...",
+            "min_amount_error": "Hata",
+            "min_amount_format": "Min: {amount} {currency}",
             "email_placeholder": "E-posta (İsteğe Bağlı)",
             "message_placeholder": "Mesajınız (İsteğe Bağlı)",
             "donate_button": "Bağış Yap",
@@ -255,6 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyContainer = document.getElementById('copy-container');
     const copyIcon = document.getElementById('copy-icon');
     const backToHomeButton = document.getElementById('back-to-home');
+    const minAmountText = document.getElementById('min-amount-text');
 
     let pollingInterval;
 
@@ -443,6 +452,47 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- YENİ: Kripto Para Seçim Mantığı ---
     const currencyOptions = document.querySelectorAll('.currency-option');
 
+    // Function to fetch and display the minimum amount
+    async function updateMinAmount() {
+        const selectedCurrency = document.querySelector('input[name="currency"]:checked').value;
+        const currencySymbol = document.querySelector('input[name="currency"]:checked').parentElement.querySelector('span').textContent;
+
+        minAmountText.textContent = currentTranslations['min_amount_loading'];
+
+        if (selectedCurrency === 'usdttrc20') {
+            minAmountText.textContent = currentTranslations['min_amount_default'];
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/get-estimated-price?currency=${selectedCurrency}`);
+            const data = await response.json();
+
+            if (response.ok && data.estimated_amount) {
+                let estimatedAmount = parseFloat(data.estimated_amount);
+                
+                // Round up to a reasonable number of decimal places
+                if (estimatedAmount < 1) {
+                     // For values less than 1 (like BTC), use more precision
+                    estimatedAmount = Math.ceil(estimatedAmount * 100000000) / 100000000;
+                } else {
+                    // For larger values (like TRX), round up to the next whole number
+                    estimatedAmount = Math.ceil(estimatedAmount);
+                }
+
+                minAmountText.textContent = currentTranslations['min_amount_format']
+                    .replace('{amount}', estimatedAmount)
+                    .replace('{currency}', currencySymbol);
+            } else {
+                minAmountText.textContent = currentTranslations['min_amount_error'];
+            }
+        } catch (error) {
+            console.error('Error fetching min amount:', error);
+            minAmountText.textContent = currentTranslations['min_amount_error'];
+        }
+    }
+
+
     function handleCurrencySelection() {
         // Önce tüm seçeneklerden 'selected' sınıfını ve onay işaretini kaldır
         currencyOptions.forEach(opt => {
@@ -478,12 +528,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Tarayıcı, label'a tıklandığında içindeki radyoyu otomatik olarak işaretler.
             // Sadece bu işlemden sonra görselleri güncellememiz gerekiyor.
             // Küçük bir gecikme, 'checked' durumunun DOM'da güncellenmesini sağlar.
-            setTimeout(handleCurrencySelection, 0);
+            setTimeout(() => {
+                handleCurrencySelection();
+                updateMinAmount(); // Update min amount when currency changes
+            }, 0);
         });
     });
 
     // Sayfa yüklendiğinde başlangıç durumunu ayarla
     handleCurrencySelection();
+    updateMinAmount(); // Also update on initial load
 
     // Add event listener for the donate button label to trigger the hidden button's click
     donateButtonLabel.addEventListener('click', () => {
