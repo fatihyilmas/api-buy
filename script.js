@@ -264,13 +264,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyIcon = document.getElementById('copy-icon');
     const backToHomeButton = document.getElementById('back-to-home');
     const minAmountText = document.getElementById('min-amount-text');
+    const amountIcon = document.getElementById('amount-icon');
 
     let pollingInterval;
+    let currentMinAmount = 10; // Default to 10 USD
+    let isCrypto = false;
 
     amountInput.addEventListener('blur', () => {
         const value = parseFloat(amountInput.value);
-        if (amountInput.value && value < 10) {
-            amountInput.value = 10;
+        if (amountInput.value && value < currentMinAmount) {
+            amountInput.value = currentMinAmount;
         }
     });
 
@@ -287,16 +290,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('email').value;
         const message = document.getElementById('message').value;
 
+        let payload;
+        if (isCrypto) {
+            payload = {
+                pay_amount: parseFloat(amount),
+                pay_currency: currency,
+                order_description: `Donation from ${email || 'Anonymous'}. Message: ${message || 'None'}`
+            }
+        } else {
+            payload = {
+                price_amount: parseFloat(amount),
+                price_currency: 'usd',
+                pay_currency: currency,
+                order_description: `Donation: ${amount} USD from ${email || 'Anonymous'}. Message: ${message || 'None'}`
+            }
+        }
+
         try {
             const response = await fetch('/api/create-payment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    amount: parseFloat(amount), 
-                    currency, 
-                    email, 
-                    message 
-                })
+                body: JSON.stringify(payload)
             });
 
             const data = await response.json();
@@ -458,11 +472,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const currencySymbol = document.querySelector('input[name="currency"]:checked').parentElement.querySelector('span').textContent;
 
         minAmountText.textContent = currentTranslations['min_amount_loading'];
+        amountInput.disabled = true;
+        amountInput.value = ''; // Clear previous amount
 
         if (selectedCurrency === 'usdttrc20') {
+            currentMinAmount = 10;
+            isCrypto = false;
             minAmountText.textContent = currentTranslations['min_amount_default'];
+            amountInput.placeholder = currentTranslations['amount_placeholder_new'];
+            amountIcon.setAttribute('data-lucide', 'dollar-sign');
+            lucide.createIcons();
+            amountInput.disabled = false;
             return;
         }
+
+        isCrypto = true;
+        amountIcon.setAttribute('data-lucide', 'coins'); // Change icon for crypto
+        lucide.createIcons();
 
         try {
             const response = await fetch(`/api/get-estimated-price?currency=${selectedCurrency}`);
@@ -474,21 +500,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Round up to a reasonable number of decimal places
                 if (estimatedAmount < 1) {
                      // For values less than 1 (like BTC), use more precision
-                    estimatedAmount = Math.ceil(estimatedAmount * 100000000) / 100000000;
+                    currentMinAmount = Math.ceil(estimatedAmount * 100000000) / 100000000;
                 } else {
                     // For larger values (like TRX), round up to the next whole number
-                    estimatedAmount = Math.ceil(estimatedAmount);
+                    currentMinAmount = Math.ceil(estimatedAmount);
                 }
 
                 minAmountText.textContent = currentTranslations['min_amount_format']
-                    .replace('{amount}', estimatedAmount)
+                    .replace('{amount}', currentMinAmount)
                     .replace('{currency}', currencySymbol);
+                
+                amountInput.placeholder = currentTranslations['min_amount_format']
+                    .replace('{amount}', currentMinAmount)
+                    .replace('{currency}', currencySymbol);
+                
+                // Set the input to the minimum value automatically
+                amountInput.value = currentMinAmount;
+
             } else {
                 minAmountText.textContent = currentTranslations['min_amount_error'];
             }
         } catch (error) {
             console.error('Error fetching min amount:', error);
             minAmountText.textContent = currentTranslations['min_amount_error'];
+        } finally {
+            amountInput.disabled = false; // Re-enable input
         }
     }
 
