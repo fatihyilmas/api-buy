@@ -26,7 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "address_copied": "Address copied to clipboard!",
             "copy_failed": "Failed to copy address.",
             "payment_failed": "Payment failed. Please try again.",
-            "payment_expired": "Payment expired. Please create a new one."
+            "payment_expired": "Payment expired. Please create a new one.",
+            "min_amount_label": "Min. Amount"
         },
         tr: {
             "support_project": "Projeyi Destekle",
@@ -48,7 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "address_copied": "Adres panoya kopyalandı!",
             "copy_failed": "Adres kopyalanamadı.",
             "payment_failed": "Ödeme başarısız oldu. Lütfen tekrar deneyin.",
-            "payment_expired": "Ödeme süresi doldu. Lütfen yeni bir ödeme oluşturun."
+            "payment_expired": "Ödeme süresi doldu. Lütfen yeni bir ödeme oluşturun.",
+            "min_amount_label": "Min. Miktar"
         },
         ja: {
             "support_project": "プロジェクトを支援する",
@@ -255,8 +257,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyContainer = document.getElementById('copy-container');
     const copyIcon = document.getElementById('copy-icon');
     const backToHomeButton = document.getElementById('back-to-home');
+    const minAmountDisplay = document.getElementById('min-amount-display');
 
     let pollingInterval;
+    let debounceTimer;
 
     amountInput.addEventListener('blur', () => {
         const value = parseFloat(amountInput.value);
@@ -440,6 +444,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
+    async function updateEstimatedAmount() {
+        const amount = parseFloat(amountInput.value) || 10;
+        const currency = document.querySelector('input[name="currency"]:checked').value;
+
+        if (currency === 'usdttrc20') {
+            minAmountDisplay.textContent = `10.00 USDT`;
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/get-estimated-amount?amount=${amount}&currency_to=${currency}`);
+            const data = await response.json();
+            if (response.ok && data.rounded_amount) {
+                minAmountDisplay.textContent = `${data.rounded_amount} ${currency.toUpperCase()}`;
+            } else {
+                minAmountDisplay.textContent = '...';
+            }
+        } catch (error) {
+            console.error('Error fetching estimated amount:', error);
+            minAmountDisplay.textContent = 'Error';
+        }
+    }
+
+    amountInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(updateEstimatedAmount, 500);
+    });
+
     // --- YENİ: Kripto Para Seçim Mantığı ---
     const currencyOptions = document.querySelectorAll('.currency-option');
 
@@ -478,12 +510,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Tarayıcı, label'a tıklandığında içindeki radyoyu otomatik olarak işaretler.
             // Sadece bu işlemden sonra görselleri güncellememiz gerekiyor.
             // Küçük bir gecikme, 'checked' durumunun DOM'da güncellenmesini sağlar.
-            setTimeout(handleCurrencySelection, 0);
+            setTimeout(() => {
+                handleCurrencySelection();
+                updateEstimatedAmount();
+            }, 0);
         });
     });
 
     // Sayfa yüklendiğinde başlangıç durumunu ayarla
     handleCurrencySelection();
+    updateEstimatedAmount();
 
     // Add event listener for the donate button label to trigger the hidden button's click
     donateButtonLabel.addEventListener('click', () => {
