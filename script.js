@@ -257,11 +257,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const backToHomeButton = document.getElementById('back-to-home');
 
     let pollingInterval;
+    let currentMinAmount = 10; // Default minimum amount in USD
+
+    // --- YENİ: Minimum Tutarı Dinamik Olarak Güncelleme Fonksiyonu ---
+    async function updateMinimumAmount(currency) {
+        // USDT için minimum tutar her zaman 10 USD'dir, API'ye sormaya gerek yok.
+        if (currency === 'usdttrc20') {
+            amountInput.placeholder = currentTranslations['amount_placeholder'] || 'Donation Amount (Min 10 USD)';
+            amountInput.min = 10;
+            amountInput.value = 10; // Varsayılan olarak 10 ayarla
+            currentMinAmount = 10;
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/get-min-amount?currency_from=${currency}`);
+            const data = await response.json();
+            if (response.ok && data.min_amount) {
+                // Gelen minimum tutarı yukarıya doğru anlamlı bir rakama yuvarla
+                let minAmount = parseFloat(data.min_amount);
+                // Değeri biraz daha artırarak API hatalarını önle
+                minAmount *= 1.05; 
+                // Değerin büyüklüğüne göre yuvarlama hassasiyetini ayarla
+                const precision = minAmount < 1 ? 1000000 : 100;
+                const roundedMinAmount = Math.ceil(minAmount * precision) / precision;
+
+                currentMinAmount = roundedMinAmount;
+                amountInput.value = roundedMinAmount;
+                amountInput.min = roundedMinAmount;
+                amountInput.placeholder = `Min ${roundedMinAmount} ${currency.toUpperCase()}`;
+            } else {
+                // Hata durumunda varsayılan 10 USD'ye dön
+                amountInput.min = 10;
+                currentMinAmount = 10;
+                console.error("Could not fetch minimum amount, falling back to default.");
+            }
+        } catch (error) {
+            console.error('Error fetching minimum amount:', error);
+            amountInput.min = 10;
+            currentMinAmount = 10;
+        }
+    }
 
     amountInput.addEventListener('blur', () => {
         const value = parseFloat(amountInput.value);
-        if (amountInput.value && value < 10) {
-            amountInput.value = 10;
+        if (amountInput.value && value < currentMinAmount) {
+            amountInput.value = currentMinAmount;
         }
     });
 
@@ -282,11 +323,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/api/create-payment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    amount: parseFloat(amount), 
-                    currency, 
-                    email, 
-                    message 
+                body: JSON.stringify({
+                    // DEĞİŞİKLİK: Artık 'pay_amount' ve 'pay_currency' gönderiyoruz.
+                    // 'price_amount' (USD tutarı) backend'de opsiyonel hale gelecek.
+                    pay_amount: parseFloat(amount),
+                    pay_currency: currency,
+                    email,
+                    message
                 })
             });
 
@@ -443,7 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- YENİ: Kripto Para Seçim Mantığı ---
     const currencyOptions = document.querySelectorAll('.currency-option');
 
-    function handleCurrencySelection() {
+    async function handleCurrencySelection() {
         // Önce tüm seçeneklerden 'selected' sınıfını ve onay işaretini kaldır
         currencyOptions.forEach(opt => {
             opt.classList.remove('selected');
@@ -469,6 +512,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Lucide ikonlarını yeniden oluştur
         if (window.lucide) {
             lucide.createIcons();
+        }
+        
+        // YENİ: Minimum tutarı güncelle
+        if (checkedRadio) {
+            await updateMinimumAmount(checkedRadio.value);
         }
     }
 
