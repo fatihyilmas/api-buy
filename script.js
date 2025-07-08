@@ -509,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetButton() {
         actualDonateButton.disabled = false;
         donateButtonLabel.classList.remove('disabled');
-        buttonText.textContent = currentTranslations['donate_button'];
+        buttonText.textContent = currentTranslations['button_creating'];
         buttonLoader.classList.add('hidden');
     }
 
