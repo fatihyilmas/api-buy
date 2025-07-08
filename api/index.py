@@ -70,10 +70,12 @@ def create_html_email_body(data):
         .table {{ width: 100%; border-collapse: collapse; }}
         .table td {{ padding: 12px 0; border-bottom: 1px solid #f0f0f0; }}
         .table td:first-child {{ font-weight: 600; color: #555; width: 150px; }}
-        .status {{ font-weight: bold; padding: 5px 10px; border-radius: 15px; color: #fff; text-align: center; }}
+        .status {{ font-weight: bold; padding: 5px 10px; border-radius: 15px; color: #fff; text-align: center; display: inline-block; }}
         .status.waiting {{ background-color: #f39c12; }}
         .status.finished {{ background-color: #2ecc71; }}
-        .message-box {{ background-color: #f9f9f9; border: 1px solid #eee; padding: 15px; margin-top: 20px; border-radius: 5px; white-space: pre-wrap; word-wrap: break-word; }}
+        .user-info {{ background-color: #f9f9f9; border: 1px solid #eee; padding: 20px; margin-top: 20px; border-radius: 5px; }}
+        .user-info strong {{ display: block; color: #333; margin-bottom: 5px; }}
+        .user-info p {{ margin: 0 0 15px 0; padding-left: 10px; border-left: 3px solid #ddd; color: #666; }}
     </style>
     </head>
     <body>
@@ -84,10 +86,10 @@ def create_html_email_body(data):
                 <tr><td>Ödeme ID:</td><td>{payment_id}</td></tr>
                 <tr><td>Talep Edilen Tutar:</td><td>{price_amount} {price_currency}</td></tr>
                 <tr><td>Ödenen Tutar:</td><td>{pay_amount} {pay_currency}</td></tr>
-                <tr><td colspan="2">&nbsp;</td></tr>
-                <tr><td>Kullanıcı E-posta:</td><td>{user_email}</td></tr>
             </table>
-            <div class="message-box">
+            <div class="user-info">
+                <strong>Kullanıcı E-posta:</strong>
+                <p>{user_email}</p>
                 <strong>Kullanıcı Mesajı:</strong>
                 <p>{user_message}</p>
             </div>
