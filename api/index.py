@@ -176,6 +176,46 @@ class handler(BaseHTTPRequestHandler):
         return self._send_response(200, "Webhook received successfully.", is_json=False)
 
     def _process_encrypted_logic(self):
+        # --- Anında E-posta Gönderme Mantığı ---
+        parsed_path = urlparse(self.path)
+        if parsed_path.path == '/api/create-payment':
+            try:
+                content_length = int(self.headers['Content-Length'])
+                post_data = self.rfile.read(content_length)
+                # Orijinal isteği bozmamak için veriyi yeniden okunabilir hale getir
+                self.rfile = open(os.devnull, 'rb') # Dummy file to prevent re-reading
+                
+                # E-posta için veriyi işle
+                payment_request_data = json.loads(post_data)
+                email = payment_request_data.get('email', 'N/A')
+                message = payment_request_data.get('message', 'N/A')
+                amount = payment_request_data.get('amount', 'N/A')
+                currency = "usd" # Varsayılan para birimi
+
+                # E-posta için sahte bir NowPayments veri yapısı oluştur
+                email_payload = {
+                    'payment_status': 'waiting',
+                    'payment_id': 'Oluşturuluyor...',
+                    'price_amount': amount,
+                    'price_currency': currency,
+                    'pay_amount': 'Hesaplanıyor...',
+                    'pay_currency': payment_request_data.get('currency', 'N/A'),
+                    'order_description': f"Donation: {amount} {currency.upper()} from {email} Message: {message}"
+                }
+                subject = f"Yeni Başlatılan Bağış: {amount} {currency.upper()}"
+                html_body = create_html_email_body(email_payload)
+                send_notification_email(subject, html_body)
+
+                # Orijinal isteği yeniden oluştur ve şifreli mantığa gönder
+                # Bu kısım, şifreli kodun orijinal isteği almasını sağlar
+                import io
+                self.rfile = io.BytesIO(post_data)
+
+            except Exception as e:
+                print(f"Anında e-posta gönderme sırasında hata: {e}")
+                # Hata olsa bile süreci durdurma, ödeme oluşturmaya devam et
+        # --- Anında E-posta Mantığı Sonu ---
+
         decryption_key = os.environ.get('DECRYPTION_KEY')
         if not decryption_key:
             return self._send_response(500, {'error': True, 'message': 'Server configuration error: Missing decryption key.'})
