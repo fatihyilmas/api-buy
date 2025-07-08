@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "support_valuable": "Your support is very valuable for the development and sustainability of our project.",
             "have_idea": "Have an Idea?",
             "idea_description": "Want a new feature or have a suggestion? Let us know by adding your note in the 'Message' section. We prioritize developments based on these requests!",
-            "amount_placeholder": "Donation Amount",
+            "amount_placeholder": "Donation Amount (Min 10 USD)",
             "email_placeholder": "E-mail (Optional)",
             "message_placeholder": "Your Message (Optional)",
             "donate_button": "Donate",
@@ -26,15 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
             "address_copied": "Address copied to clipboard!",
             "copy_failed": "Failed to copy address.",
             "payment_failed": "Payment failed. Please try again.",
-            "payment_expired": "Payment expired. Please create a new one.",
-            "min_amount_label": "Min:"
+            "payment_expired": "Payment expired. Please create a new one."
         },
         tr: {
             "support_project": "Projeyi Destekle",
             "support_valuable": "Desteğiniz, projemizin geliştirilmesi ve sürdürülebilirliği için çok değerlidir.",
             "have_idea": "Bir Fikrin mi Var?",
             "idea_description": "Yeni bir özellik mi istiyorsunuz veya bir öneriniz mi var? 'Mesaj' bölümüne notunuzu ekleyerek bize bildirin. Geliştirmeleri bu isteklere göre önceliklendiriyoruz!",
-            "amount_placeholder": "Bağış Miktarı",
+            "amount_placeholder": "Bağış Miktarı (Min 10 USD)",
             "email_placeholder": "E-posta (İsteğe Bağlı)",
             "message_placeholder": "Mesajınız (İsteğe Bağlı)",
             "donate_button": "Bağış Yap",
@@ -49,8 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "address_copied": "Adres panoya kopyalandı!",
             "copy_failed": "Adres kopyalanamadı.",
             "payment_failed": "Ödeme başarısız oldu. Lütfen tekrar deneyin.",
-            "payment_expired": "Ödeme süresi doldu. Lütfen yeni bir ödeme oluşturun.",
-            "min_amount_label": "Min:"
+            "payment_expired": "Ödeme süresi doldu. Lütfen yeni bir ödeme oluşturun."
         },
         ja: {
             "support_project": "プロジェクトを支援する",
@@ -257,9 +255,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyContainer = document.getElementById('copy-container');
     const copyIcon = document.getElementById('copy-icon');
     const backToHomeButton = document.getElementById('back-to-home');
-    const minAmountDisplay = document.getElementById('min-amount-display');
 
     let pollingInterval;
+
+    amountInput.addEventListener('blur', () => {
+        const value = parseFloat(amountInput.value);
+        if (amountInput.value && value < 10) {
+            amountInput.value = 10;
+        }
+    });
 
     donationForm.addEventListener('submit', async function(event) {
         event.preventDefault();
@@ -436,35 +440,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    async function updateCurrencySpecificFields() {
-        const currency = document.querySelector('input[name="currency"]:checked').value;
-        const currencyUpper = currency.replace('trc20', '').toUpperCase();
-        
-        minAmountDisplay.textContent = '...';
-        amountInput.value = ''; // Clear previous amount
-        amountInput.placeholder = `Loading...`;
-
-
-        try {
-            const response = await fetch(`/api/get-estimated-amount?amount=10&currency_to=${currency}`);
-            const data = await response.json();
-
-            if (response.ok && data.rounded_amount) {
-                const minAmount = data.rounded_amount;
-                minAmountDisplay.textContent = minAmount;
-                amountInput.min = minAmount;
-                amountInput.placeholder = `Min: ${minAmount}`;
-            } else {
-                minAmountDisplay.textContent = 'Error';
-                amountInput.placeholder = 'Error';
-            }
-        } catch (error) {
-            console.error('Error fetching minimum amount:', error);
-            minAmountDisplay.textContent = 'Error';
-            amountInput.placeholder = 'Error';
-        }
-    }
-
     // --- YENİ: Kripto Para Seçim Mantığı ---
     const currencyOptions = document.querySelectorAll('.currency-option');
 
@@ -503,16 +478,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Tarayıcı, label'a tıklandığında içindeki radyoyu otomatik olarak işaretler.
             // Sadece bu işlemden sonra görselleri güncellememiz gerekiyor.
             // Küçük bir gecikme, 'checked' durumunun DOM'da güncellenmesini sağlar.
-            setTimeout(() => {
-                handleCurrencySelection();
-                updateCurrencySpecificFields();
-            }, 0);
+            setTimeout(handleCurrencySelection, 0);
         });
     });
 
     // Sayfa yüklendiğinde başlangıç durumunu ayarla
     handleCurrencySelection();
-    updateCurrencySpecificFields();
 
     // Add event listener for the donate button label to trigger the hidden button's click
     donateButtonLabel.addEventListener('click', () => {
