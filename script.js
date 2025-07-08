@@ -240,6 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const donationForm = document.getElementById('donation-form');
     const amountInput = document.getElementById('amount');
+    const minAmountDisplay = document.getElementById('min-amount-display');
     const amountCurrencyIcon = document.getElementById('amount-currency-icon');
     const donateButtonLabel = document.getElementById('donate-button-label'); // The label wrapping the actual button
     const actualDonateButton = document.getElementById('donate-button'); // The hidden button inside the label
@@ -258,9 +259,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const backToHomeButton = document.getElementById('back-to-home');
 
     let pollingInterval;
-    let currentMinAmount = 10; // Default minimum amount in USD
+    let currentMinAmount = 10; // Varsayılan minimum USD tutarı
+    const apiCache = {
+        data: {},
+        get: function(key) {
+            const item = this.data[key];
+            if (!item) return null;
+            // 5 dakika (300000 ms) önbellek süresi
+            if (new Date().getTime() - item.timestamp > 300000) {
+                delete this.data[key];
+                return null;
+            }
+            return item.value;
+        },
+        set: function(key, value) {
+            this.data[key] = {
+                value: value,
+                timestamp: new Date().getTime()
+            };
+        }
+    };
 
-    // --- YENİ: Geliştirilmiş Yuvarlama ve Arayüz Güncelleme Fonksiyonları ---
     function roundToSignificantDigits(number, significantDigits) {
         if(number === 0) return 0;
         const d = Math.ceil(Math.log10(number < 0 ? -number: number));
@@ -271,41 +290,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function updateMinimumAmount(currency) {
-        // Para birimi ikonunu ve placeholder'ı güncelle
+        amountInput.value = ''; // Ana giriş alanını temizle
+        amountCurrencyIcon.setAttribute('data-lucide', currency === 'usdttrc20' ? 'dollar-sign' : 'hash');
+        
         if (currency === 'usdttrc20') {
-            amountCurrencyIcon.setAttribute('data-lucide', 'dollar-sign');
-            amountInput.placeholder = currentTranslations['amount_placeholder'] || 'Donation Amount (Min 10 USD)';
-            amountInput.min = 10;
-            amountInput.value = 10;
             currentMinAmount = 10;
+            minAmountDisplay.value = `Min: 10 USD`;
+            amountInput.placeholder = currentTranslations['amount_placeholder'] || 'Donation Amount';
         } else {
-            amountCurrencyIcon.setAttribute('data-lucide', 'hash');
+            minAmountDisplay.value = 'Loading...';
+            
+            const cachedData = apiCache.get(currency);
+            if (cachedData) {
+                currentMinAmount = cachedData;
+                minAmountDisplay.value = `Min: ${cachedData} ${currency.toUpperCase()}`;
+                amountInput.placeholder = `${currency.toUpperCase()} Amount`;
+                return; // Önbellekten yüklediğimiz için API'ye gitme
+            }
+
             try {
-                // YENİ: 10 USD'nin kripto karşılığını almak için /get-estimated-price endpoint'ini kullan
                 const response = await fetch(`/api/get-estimated-price?amount=10&currency_from=usd&currency_to=${currency}`);
                 const data = await response.json();
                 if (response.ok && data.estimated_amount) {
-                    let estimatedAmount = parseFloat(data.estimated_amount);
-                    // API'den gelen değere küçük bir marj ekleyip yuvarla
-                    const finalAmount = roundToSignificantDigits(estimatedAmount * 1.01, 3); 
-
+                    const estimatedAmount = parseFloat(data.estimated_amount);
+                    const finalAmount = roundToSignificantDigits(estimatedAmount * 1.01, 3);
+                    
                     currentMinAmount = finalAmount;
-                    amountInput.value = finalAmount;
-                    amountInput.min = finalAmount;
-                    amountInput.placeholder = `Min ${finalAmount} ${currency.toUpperCase()}`;
+                    minAmountDisplay.value = `Min: ${finalAmount} ${currency.toUpperCase()}`;
+                    amountInput.placeholder = `${currency.toUpperCase()} Amount`;
+                    apiCache.set(currency, finalAmount); // Sonucu önbelleğe al
                 } else {
-                    // Hata durumunda varsayılan 10 USD'ye dön
-                    amountInput.min = 10;
-                    currentMinAmount = 10;
-                    console.error("Could not fetch minimum amount, falling back to default.");
+                    minAmountDisplay.value = 'Error';
+                    console.error("Could not fetch minimum amount.");
                 }
             } catch (error) {
+                minAmountDisplay.value = 'Error';
                 console.error('Error fetching minimum amount:', error);
-                amountInput.min = 10;
-                currentMinAmount = 10;
             }
         }
-        // Lucide ikonlarını yeniden oluştur
         if (window.lucide) {
             lucide.createIcons();
         }
@@ -327,23 +349,26 @@ document.addEventListener('DOMContentLoaded', () => {
     donationForm.addEventListener('submit', async function(event) {
         event.preventDefault();
 
+        const amount = document.getElementById('amount').value;
+        const currency = document.querySelector('input[name="currency"]:checked').value;
+        
+        if (!amount || parseFloat(amount) <= 0) {
+            showNotification('Please enter a valid amount.', 'error');
+            return;
+        }
+
+        if (parseFloat(amount) < currentMinAmount) {
+            showNotification(`Minimum amount is ${currentMinAmount} ${currency.toUpperCase()}`, 'error');
+            return;
+        }
+
         actualDonateButton.disabled = true;
         donateButtonLabel.classList.add('disabled');
         buttonText.textContent = currentTranslations['button_creating'];
         buttonLoader.classList.remove('hidden');
 
-        const amount = document.getElementById('amount').value;
-        const currency = document.querySelector('input[name="currency"]:checked').value;
         const email = document.getElementById('email').value;
         const message = document.getElementById('message').value;
-
-        // Miktarın geçerli minimumdan az olmadığından emin ol
-        const minForSelected = (currency === 'usdttrc20') ? 10 : currentMinAmount;
-        if (parseFloat(amount) < minForSelected) {
-            showNotification(`Minimum amount for ${currency.toUpperCase()} is ${minForSelected}`, 'error');
-            resetButton();
-            return;
-        }
 
         try {
             const response = await fetch('/api/create-payment', {
