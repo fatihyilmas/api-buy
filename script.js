@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "support_valuable": "Your support is very valuable for the development and sustainability of our project.",
             "have_idea": "Have an Idea?",
             "idea_description": "Want a new feature or have a suggestion? Let us know by adding your note in the 'Message' section. We prioritize developments based on these requests!",
-            "amount_placeholder": "Donation Amount (Min 10 USD)",
+            "amount_placeholder": "Donation Amount",
             "email_placeholder": "E-mail (Optional)",
             "message_placeholder": "Your Message (Optional)",
             "donate_button": "Donate",
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "support_valuable": "Desteğiniz, projemizin geliştirilmesi ve sürdürülebilirliği için çok değerlidir.",
             "have_idea": "Bir Fikrin mi Var?",
             "idea_description": "Yeni bir özellik mi istiyorsunuz veya bir öneriniz mi var? 'Mesaj' bölümüne notunuzu ekleyerek bize bildirin. Geliştirmeleri bu isteklere göre önceliklendiriyoruz!",
-            "amount_placeholder": "Bağış Miktarı (Min 10 USD)",
+            "amount_placeholder": "Bağış Miktarı",
             "email_placeholder": "E-posta (İsteğe Bağlı)",
             "message_placeholder": "Mesajınız (İsteğe Bağlı)",
             "donate_button": "Bağış Yap",
@@ -260,14 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const minAmountDisplay = document.getElementById('min-amount-display');
 
     let pollingInterval;
-    let debounceTimer;
-
-    amountInput.addEventListener('blur', () => {
-        const value = parseFloat(amountInput.value);
-        if (amountInput.value && value < 10) {
-            amountInput.value = 10;
-        }
-    });
 
     donationForm.addEventListener('submit', async function(event) {
         event.preventDefault();
@@ -444,27 +436,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    async function updateMinAmountDisplay() {
+    async function updateCurrencySpecificFields() {
         const currency = document.querySelector('input[name="currency"]:checked').value;
-        minAmountDisplay.textContent = '...'; // Reset while fetching
+        const currencyUpper = currency.replace('trc20', '').toUpperCase();
+        
+        minAmountDisplay.textContent = '...';
+        amountInput.value = ''; // Clear previous amount
+        amountInput.placeholder = `Loading...`;
 
-        if (currency === 'usdttrc20') {
-            minAmountDisplay.textContent = `10.00`;
-            return;
-        }
 
         try {
-            // Always fetch the estimate for 10 USD for the min amount display
             const response = await fetch(`/api/get-estimated-amount?amount=10&currency_to=${currency}`);
             const data = await response.json();
+
             if (response.ok && data.rounded_amount) {
-                minAmountDisplay.textContent = `${data.rounded_amount}`;
+                const minAmount = data.rounded_amount;
+                minAmountDisplay.textContent = minAmount;
+                amountInput.min = minAmount;
+                amountInput.placeholder = `Min: ${minAmount}`;
             } else {
-                minAmountDisplay.textContent = '...';
+                minAmountDisplay.textContent = 'Error';
+                amountInput.placeholder = 'Error';
             }
         } catch (error) {
             console.error('Error fetching minimum amount:', error);
             minAmountDisplay.textContent = 'Error';
+            amountInput.placeholder = 'Error';
         }
     }
 
@@ -508,14 +505,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // Küçük bir gecikme, 'checked' durumunun DOM'da güncellenmesini sağlar.
             setTimeout(() => {
                 handleCurrencySelection();
-                updateMinAmountDisplay();
+                updateCurrencySpecificFields();
             }, 0);
         });
     });
 
     // Sayfa yüklendiğinde başlangıç durumunu ayarla
     handleCurrencySelection();
-    updateMinAmountDisplay();
+    updateCurrencySpecificFields();
 
     // Add event listener for the donate button label to trigger the hidden button's click
     donateButtonLabel.addEventListener('click', () => {
