@@ -1,4 +1,2 @@
 requests
 cryptography
-vercel-kv
-redis

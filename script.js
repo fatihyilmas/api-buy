@@ -240,8 +240,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const donationForm = document.getElementById('donation-form');
     const amountInput = document.getElementById('amount');
-    const minAmountDisplay = document.getElementById('min-amount-display');
-    const amountCurrencyIcon = document.getElementById('amount-currency-icon');
     const donateButtonLabel = document.getElementById('donate-button-label'); // The label wrapping the actual button
     const actualDonateButton = document.getElementById('donate-button'); // The hidden button inside the label
     const buttonText = document.getElementById('button-text-display'); // The span for displaying text
@@ -259,89 +257,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const backToHomeButton = document.getElementById('back-to-home');
 
     let pollingInterval;
-    let currentMinAmount = 10; // Varsayılan minimum USD tutarı
-    const apiCache = {
-        data: {},
-        get: function(key) {
-            const item = this.data[key];
-            if (!item) return null;
-            // 5 dakika (300000 ms) önbellek süresi
-            if (new Date().getTime() - item.timestamp > 300000) {
-                delete this.data[key];
-                return null;
-            }
-            return item.value;
-        },
-        set: function(key, value) {
-            this.data[key] = {
-                value: value,
-                timestamp: new Date().getTime()
-            };
-        }
-    };
-
-    function roundToSignificantDigits(number, significantDigits) {
-        if(number === 0) return 0;
-        const d = Math.ceil(Math.log10(number < 0 ? -number: number));
-        const power = significantDigits - d;
-        const magnitude = Math.pow(10, power);
-        const shifted = Math.ceil(number * magnitude);
-        return shifted / magnitude;
-    }
-
-    async function updateMinimumAmount(currency) {
-        amountInput.value = ''; // Ana giriş alanını temizle
-        amountCurrencyIcon.setAttribute('data-lucide', currency === 'usdttrc20' ? 'dollar-sign' : 'hash');
-        
-        if (currency === 'usdttrc20') {
-            currentMinAmount = 10;
-            minAmountDisplay.value = `Min: 10 USD`;
-            amountInput.placeholder = currentTranslations['amount_placeholder'] || 'Donation Amount';
-        } else {
-            minAmountDisplay.value = 'Loading...';
-            
-            const cachedData = apiCache.get(currency);
-            if (cachedData) {
-                currentMinAmount = cachedData;
-                minAmountDisplay.value = `Min: ${cachedData} ${currency.toUpperCase()}`;
-                amountInput.placeholder = `${currency.toUpperCase()} Amount`;
-                return; // Önbellekten yüklediğimiz için API'ye gitme
-            }
-
-            try {
-                const response = await fetch(`/api/get-estimated-price?amount=10&currency_from=usd&currency_to=${currency}`);
-                const data = await response.json();
-                if (response.ok && data.estimated_amount) {
-                    const estimatedAmount = parseFloat(data.estimated_amount);
-                    const finalAmount = roundToSignificantDigits(estimatedAmount * 1.01, 3);
-                    
-                    currentMinAmount = finalAmount;
-                    minAmountDisplay.value = `Min: ${finalAmount} ${currency.toUpperCase()}`;
-                    amountInput.placeholder = `${currency.toUpperCase()} Amount`;
-                    apiCache.set(currency, finalAmount); // Sonucu önbelleğe al
-                } else {
-                    minAmountDisplay.value = 'Error';
-                    console.error("Could not fetch minimum amount.");
-                }
-            } catch (error) {
-                minAmountDisplay.value = 'Error';
-                console.error('Error fetching minimum amount:', error);
-            }
-        }
-        if (window.lucide) {
-            lucide.createIcons();
-        }
-    }
 
     amountInput.addEventListener('blur', () => {
         const value = parseFloat(amountInput.value);
-        const selectedCurrency = document.querySelector('input[name="currency"]:checked').value;
-        // USDT dışındaki para birimleri için minimum kontrolü yap
-        if (selectedCurrency !== 'usdttrc20' && amountInput.value && value < currentMinAmount) {
-            amountInput.value = currentMinAmount;
-        } 
-        // USDT için minimum 10$ kontrolü
-        else if (selectedCurrency === 'usdttrc20' && amountInput.value && value < 10) {
+        if (amountInput.value && value < 10) {
             amountInput.value = 10;
         }
     });
@@ -349,24 +268,13 @@ document.addEventListener('DOMContentLoaded', () => {
     donationForm.addEventListener('submit', async function(event) {
         event.preventDefault();
 
-        const amount = document.getElementById('amount').value;
-        const currency = document.querySelector('input[name="currency"]:checked').value;
-        
-        if (!amount || parseFloat(amount) <= 0) {
-            showNotification('Please enter a valid amount.', 'error');
-            return;
-        }
-
-        if (parseFloat(amount) < currentMinAmount) {
-            showNotification(`Minimum amount is ${currentMinAmount} ${currency.toUpperCase()}`, 'error');
-            return;
-        }
-
-        actualDonateButton.disabled = true;
-        donateButtonLabel.classList.add('disabled');
+        actualDonateButton.disabled = true; // Disable the actual button
+        donateButtonLabel.classList.add('disabled'); // Add a class to visually indicate disabled state if needed
         buttonText.textContent = currentTranslations['button_creating'];
         buttonLoader.classList.remove('hidden');
 
+        const amount = document.getElementById('amount').value;
+        const currency = document.querySelector('input[name="currency"]:checked').value;
         const email = document.getElementById('email').value;
         const message = document.getElementById('message').value;
 
@@ -374,11 +282,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/api/create-payment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    pay_amount: parseFloat(amount),
-                    pay_currency: currency,
-                    email,
-                    message
+                body: JSON.stringify({ 
+                    amount: parseFloat(amount), 
+                    currency, 
+                    email, 
+                    message 
                 })
             });
 
@@ -387,17 +295,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok && !data.error) {
                 displayPaymentDetails(data);
             } else {
-                // HATA AYIKLAMA: Sunucudan gelen detaylı hatayı göster
-                const errorMessage = data.details ? JSON.stringify(data.details) : (data.message || 'An error occurred.');
-                showNotification(errorMessage, 'error');
+                showNotification(data.message || 'An error occurred.', 'error');
                 resetButton();
             }
-            } catch (error) {
-                console.error('Error creating payment:', error);
-                showNotification('Could not connect to the server.', 'error');
-                resetButton();
-            }
-        });
+        } catch (error) {
+            console.error('Error creating payment:', error);
+            showNotification('Could not connect to the server.', 'error');
+            resetButton();
+        }
+    });
 
     function displayPaymentDetails(data) {
         donationView.classList.add('hidden');
@@ -509,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetButton() {
         actualDonateButton.disabled = false;
         donateButtonLabel.classList.remove('disabled');
-        buttonText.textContent = currentTranslations['button_creating'];
+        buttonText.textContent = currentTranslations['donate_button'];
         buttonLoader.classList.add('hidden');
     }
 
@@ -537,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- YENİ: Kripto Para Seçim Mantığı ---
     const currencyOptions = document.querySelectorAll('.currency-option');
 
-    async function handleCurrencySelection() {
+    function handleCurrencySelection() {
         // Önce tüm seçeneklerden 'selected' sınıfını ve onay işaretini kaldır
         currencyOptions.forEach(opt => {
             opt.classList.remove('selected');
@@ -563,11 +469,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Lucide ikonlarını yeniden oluştur
         if (window.lucide) {
             lucide.createIcons();
-        }
-        
-        // YENİ: Minimum tutarı güncelle
-        if (checkedRadio) {
-            await updateMinimumAmount(checkedRadio.value);
         }
     }
 
