@@ -113,16 +113,21 @@ class handler(BaseHTTPRequestHandler):
             signature = self.headers.get('x-nowpayments-sig')
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
-            
-            # Gelen veriyi sıralı bir şekilde string'e çevirerek HMAC oluştur
-            sorted_data = json.loads(post_data, object_pairs_hook=lambda pairs: json.dumps(dict(pairs), sort_keys=True).encode())
-            
-            expected_signature = hmac.new(ipn_secret_key.encode(), sorted_data, hashlib.sha512).hexdigest()
+            data = json.loads(post_data)
+
+            # Dokümantasyona uygun imza doğrulama
+            sorted_data = json.dumps(data, separators=(',', ':'), sort_keys=True)
+            expected_signature = hmac.new(
+                ipn_secret_key.encode(),
+                sorted_data.encode(),
+                hashlib.sha512
+            ).hexdigest()
 
             if not hmac.compare_digest(expected_signature, signature):
                 self.send_response(403)
                 self.end_headers()
                 self.wfile.write(b"Forbidden: Invalid signature.")
+                print(f"Signature mismatch. Expected: {expected_signature}, Got: {signature}")
                 return
         except Exception as e:
             self.send_response(400)
@@ -131,7 +136,6 @@ class handler(BaseHTTPRequestHandler):
             return
             
         # 3. Veriyi işle
-        data = json.loads(post_data)
         payment_status = data.get('payment_status')
 
         # 4. İsteğe göre 'waiting' durumunu işle
