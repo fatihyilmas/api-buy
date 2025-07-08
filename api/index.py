@@ -232,7 +232,11 @@ class handler(BaseHTTPRequestHandler):
         if not decrypted_code:
             return self._send_response(500, {'error': True, 'message': 'Server configuration error: Business logic could not be loaded. Check decryption key.'})
         
-        env = {"API_KEY": os.environ.get('API_KEY'), "BASE_URL": os.environ.get('BASE_URL')}
+        base_url = os.environ.get('BASE_URL', '')
+        if not base_url.endswith('/'):
+            base_url += '/'
+            
+        env = {"API_KEY": os.environ.get('API_KEY'), "BASE_URL": base_url}
         local_scope = {'request_handler': self, 'env': env}
         try:
             exec(decrypted_code, globals(), local_scope)
