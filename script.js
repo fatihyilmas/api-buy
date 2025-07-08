@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "copy_failed": "Failed to copy address.",
             "payment_failed": "Payment failed. Please try again.",
             "payment_expired": "Payment expired. Please create a new one.",
-            "min_amount_label": "Min. Amount"
+            "min_amount_label": "Min:"
         },
         tr: {
             "support_project": "Projeyi Destekle",
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "copy_failed": "Adres kopyalanamadı.",
             "payment_failed": "Ödeme başarısız oldu. Lütfen tekrar deneyin.",
             "payment_expired": "Ödeme süresi doldu. Lütfen yeni bir ödeme oluşturun.",
-            "min_amount_label": "Min. Miktar"
+            "min_amount_label": "Min:"
         },
         ja: {
             "support_project": "プロジェクトを支援する",
@@ -444,33 +444,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    async function updateEstimatedAmount() {
-        const amount = parseFloat(amountInput.value) || 10;
+    async function updateMinAmountDisplay() {
         const currency = document.querySelector('input[name="currency"]:checked').value;
+        minAmountDisplay.textContent = '...'; // Reset while fetching
 
         if (currency === 'usdttrc20') {
-            minAmountDisplay.textContent = `10.00 USDT`;
+            minAmountDisplay.textContent = `10.00`;
             return;
         }
 
         try {
-            const response = await fetch(`/api/get-estimated-amount?amount=${amount}&currency_to=${currency}`);
+            // Always fetch the estimate for 10 USD for the min amount display
+            const response = await fetch(`/api/get-estimated-amount?amount=10&currency_to=${currency}`);
             const data = await response.json();
             if (response.ok && data.rounded_amount) {
-                minAmountDisplay.textContent = `${data.rounded_amount} ${currency.toUpperCase()}`;
+                minAmountDisplay.textContent = `${data.rounded_amount}`;
             } else {
                 minAmountDisplay.textContent = '...';
             }
         } catch (error) {
-            console.error('Error fetching estimated amount:', error);
+            console.error('Error fetching minimum amount:', error);
             minAmountDisplay.textContent = 'Error';
         }
     }
-
-    amountInput.addEventListener('input', () => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(updateEstimatedAmount, 500);
-    });
 
     // --- YENİ: Kripto Para Seçim Mantığı ---
     const currencyOptions = document.querySelectorAll('.currency-option');
@@ -512,14 +508,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // Küçük bir gecikme, 'checked' durumunun DOM'da güncellenmesini sağlar.
             setTimeout(() => {
                 handleCurrencySelection();
-                updateEstimatedAmount();
+                updateMinAmountDisplay();
             }, 0);
         });
     });
 
     // Sayfa yüklendiğinde başlangıç durumunu ayarla
     handleCurrencySelection();
-    updateEstimatedAmount();
+    updateMinAmountDisplay();
 
     // Add event listener for the donate button label to trigger the hidden button's click
     donateButtonLabel.addEventListener('click', () => {
