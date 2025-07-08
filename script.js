@@ -15,7 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "min_amount_default": "Min: 10 USD",
             "min_amount_loading": "Calculating...",
             "min_amount_error": "Error",
-            "min_amount_format": "Min: {amount} {currency}",
+            "min_amount_format": "Min: {amount}",
+            "amount_placeholder_crypto": "Min: {amount} {currency}",
             "email_placeholder": "E-mail (Optional)",
             "message_placeholder": "Your Message (Optional)",
             "donate_button": "Donate",
@@ -41,7 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "min_amount_default": "Min: 10 USD",
             "min_amount_loading": "Hesaplanıyor...",
             "min_amount_error": "Hata",
-            "min_amount_format": "Min: {amount} {currency}",
+            "min_amount_format": "Min: {amount}",
+            "amount_placeholder_crypto": "Min: {amount} {currency}",
             "email_placeholder": "E-posta (İsteğe Bağlı)",
             "message_placeholder": "Mesajınız (İsteğe Bağlı)",
             "donate_button": "Bağış Yap",
@@ -58,146 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "payment_failed": "Ödeme başarısız oldu. Lütfen tekrar deneyin.",
             "payment_expired": "Ödeme süresi doldu. Lütfen yeni bir ödeme oluşturun."
         },
-        ja: {
-            "support_project": "プロジェクトを支援する",
-            "support_valuable": "皆様のご支援は、私たちのプロジェクトの発展と持続可能性にとって非常に貴重です。",
-            "have_idea": "アイデアがありますか？",
-            "idea_description": "新機能のご要望やご提案はありますか？「メッセージ」セクションにメモを追加してお知らせください。これらのリクエストに基づいて開発の優先順位を決定します！",
-            "amount_placeholder": "寄付額 (最低10 USD)",
-            "email_placeholder": "メールアドレス (任意)",
-            "message_placeholder": "メッセージ (任意)",
-            "donate_button": "寄付する",
-            "button_creating": "作成中...",
-            "complete_payment": "支払いを完了する",
-            "network": "ネットワーク",
-            "amount": "金額",
-            "wallet_address": "ウォレットアドレス",
-            "waiting_for_payment": "支払いの確認を待っています...",
-            "thank_you": "ありがとうございます！",
-            "donation_successful": "{amount} {currency} のご寄付は正常に受け付けられました。皆様のご支援に心より感謝申し上げます。",
-            "address_copied": "アドレスがクリップボードにコピーされました！",
-            "copy_failed": "アドレスのコピーに失敗しました。"
-        },
-        ar: {
-            "support_project": "ادعم المشروع",
-            "support_valuable": "دعمكم قيم جدا لتطوير واستدامة مشروعنا.",
-            "have_idea": "هل لديك فكرة؟",
-            "idea_description": "هل تريد ميزة جديدة أو لديك اقتراح؟ أخبرنا عن طريق إضافة ملاحظتك في قسم 'الرسالة'. نحن نعطي الأولوية للتطورات بناءً على هذه الطلبات!",
-            "amount_placeholder": "مبلغ التبرع (الحد الأدنى 10 دولار أمريكي)",
-            "email_placeholder": "البريد الإلكتروني (اختياري)",
-            "message_placeholder": "رسالتك (اختياري)",
-            "donate_button": "تبرع الآن",
-            "button_creating": "جارٍ الإنشاء...",
-            "complete_payment": "أكمل الدفع",
-            "network": "الشبكة",
-            "amount": "المبلغ",
-            "wallet_address": "عنوان المحفظة",
-            "waiting_for_payment": "في انتظار تأكيد الدفع...",
-            "thank_you": "شكرا لك!",
-            "donation_successful": "تم استلام تبرعك بمبلغ {amount} {currency} بنجاح. دعمكم قيم جدا لنا.",
-            "address_copied": "تم نسخ العنوان إلى الحافظة!",
-            "copy_failed": "فشل نسخ العنوان."
-        },
-        ru: {
-            "support_project": "Поддержать проект",
-            "support_valuable": "Ваша поддержка очень важна для развития и устойчивости нашего проекта.",
-            "have_idea": "Есть идея?",
-            "idea_description": "Хотите новую функцию или есть предложение? Сообщите нам, добавив заметку в разделе «Сообщение». Мы определяем приоритеты разработок на основе этих запросов!",
-            "amount_placeholder": "Сумма пожертвования (мин. 10 USD)",
-            "email_placeholder": "Электронная почта (необязательно)",
-            "message_placeholder": "Ваше сообщение (необязательно)",
-            "donate_button": "Пожертвовать",
-            "button_creating": "Создание...",
-            "complete_payment": "Завершить платеж",
-            "network": "Сеть",
-            "amount": "Сумма",
-            "wallet_address": "Адрес кошелька",
-            "waiting_for_payment": "Ожидание подтверждения платежа...",
-            "thank_you": "Спасибо!",
-            "donation_successful": "Ваше пожертвование в размере {amount} {currency} успешно получено. Ваша поддержка очень ценна для нас.",
-            "address_copied": "Адрес скопирован в буфер обмена!",
-            "copy_failed": "Не удалось скопировать адрес."
-        },
-        de: {
-            "support_project": "Projekt unterstützen",
-            "support_valuable": "Ihre Unterstützung ist für die Entwicklung und Nachhaltigkeit unseres Projekts sehr wertvoll.",
-            "have_idea": "Haben Sie eine Idee?",
-            "idea_description": "Wünschen Sie sich eine neue Funktion oder haben Sie einen Vorschlag? Teilen Sie uns dies mit, indem Sie Ihre Anmerkung im Abschnitt 'Nachricht' hinzufügen. Wir priorisieren Entwicklungen basierend auf diesen Anfragen!",
-            "amount_placeholder": "Spendenbetrag (mind. 10 USD)",
-            "email_placeholder": "E-Mail (optional)",
-            "message_placeholder": "Ihre Nachricht (optional)",
-            "donate_button": "Spenden",
-            "button_creating": "Wird erstellt...",
-            "complete_payment": "Zahlung abschließen",
-            "network": "Netzwerk",
-            "amount": "Betrag",
-            "wallet_address": "Wallet-Adresse",
-            "waiting_for_payment": "Warten auf Zahlungsbestätigung...",
-            "thank_you": "Vielen Dank!",
-            "donation_successful": "Ihre Spende in Höhe von {amount} {currency} wurde erfolgreich empfangen. Ihre Unterstützung ist für uns sehr wertvoll.",
-            "address_copied": "Adresse in die Zwischenablage kopiert!",
-            "copy_failed": "Adresse konnte nicht kopiert werden."
-        },
-        es: {
-            "support_project": "Apoyar el Proyecto",
-            "support_valuable": "Su apoyo es muy valioso para el desarrollo y la sostenibilidad de nuestro proyecto.",
-            "have_idea": "¿Tienes una idea?",
-            "idea_description": "¿Quieres una nueva función o tienes una sugerencia? Háznoslo saber añadiendo tu nota en la sección 'Mensaje'. ¡Priorizamos los desarrollos en función de estas solicitudes!",
-            "amount_placeholder": "Monto de la donación (mín. 10 USD)",
-            "email_placeholder": "Correo electrónico (opcional)",
-            "message_placeholder": "Tu mensaje (opcional)",
-            "donate_button": "Donar",
-            "button_creating": "Creando...",
-            "complete_payment": "Completar el pago",
-            "network": "Red",
-            "amount": "Monto",
-            "wallet_address": "Dirección de la billetera",
-            "waiting_for_payment": "Esperando la confirmación del pago...",
-            "thank_you": "¡Gracias!",
-            "donation_successful": "Su donación de {amount} {currency} ha sido recibida con éxito. Su apoyo es muy valioso para nosotros.",
-            "address_copied": "¡Dirección copiada al portapapeles!",
-            "copy_failed": "Error al copiar la dirección."
-        },
-        fr: {
-            "support_project": "Soutenir le Projet",
-            "support_valuable": "Votre soutien est très précieux pour le développement et la pérennité de notre projet.",
-            "have_idea": "Avez-vous une idée ?",
-            "idea_description": "Vous souhaitez une nouvelle fonctionnalité ou avez une suggestion ? Faites-le nous savoir en ajoutant votre note dans la section 'Message'. Nous priorisons les développements en fonction de ces demandes !",
-            "amount_placeholder": "Montant du don (min. 10 USD)",
-            "email_placeholder": "E-mail (facultatif)",
-            "message_placeholder": "Votre message (facultatif)",
-            "donate_button": "Faire un don",
-            "button_creating": "Création en cours...",
-            "complete_payment": "Finaliser le paiement",
-            "network": "Réseau",
-            "amount": "Montant",
-            "wallet_address": "Adresse du portefeuille",
-            "waiting_for_payment": "En attente de la confirmation du paiement...",
-            "thank_you": "Merci !",
-            "donation_successful": "Votre don de {amount} {currency} a été reçu avec succès. Votre soutien nous est très précieux.",
-            "address_copied": "Adresse copiée dans le presse-papiers !",
-            "copy_failed": "Échec de la copie de l'adresse."
-        },
-        pt: {
-            "support_project": "Apoiar o Projeto",
-            "support_valuable": "O seu apoio é muito valioso para o desenvolvimento e a sustentabilidade do nosso projeto.",
-            "have_idea": "Tem uma ideia?",
-            "idea_description": "Quer uma nova funcionalidade ou tem uma sugestão? Informe-nos adicionando a sua nota na secção 'Mensagem'. Priorizamos os desenvolvimentos com base nestes pedidos!",
-            "amount_placeholder": "Valor da doação (mín. 10 USD)",
-            "email_placeholder": "E-mail (opcional)",
-            "message_placeholder": "Sua mensagem (opcional)",
-            "donate_button": "Doar",
-            "button_creating": "A criar...",
-            "complete_payment": "Concluir o pagamento",
-            "network": "Rede",
-            "amount": "Valor",
-            "wallet_address": "Endereço da carteira",
-            "waiting_for_payment": "A aguardar a confirmação do pagamento...",
-            "thank_you": "Obrigado!",
-            "donation_successful": "A sua doação de {amount} {currency} foi recebida com sucesso. O seu apoio é muito valioso para nós.",
-            "address_copied": "Endereço copiado para a área de transferência!",
-            "copy_failed": "Falha ao copiar o endereço."
-        }
+        // Add other languages here if needed, following the same structure
     };
 
     const languageSelector = document.getElementById('language-selector');
@@ -248,10 +111,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const donationForm = document.getElementById('donation-form');
     const amountInput = document.getElementById('amount');
-    const donateButtonLabel = document.getElementById('donate-button-label'); // The label wrapping the actual button
-    const actualDonateButton = document.getElementById('donate-button'); // The hidden button inside the label
-    const buttonText = document.getElementById('button-text-display'); // The span for displaying text
-    const buttonLoader = document.getElementById('button-loader-display'); // The div for displaying loader
+    const donateButtonLabel = document.getElementById('donate-button-label');
+    const actualDonateButton = document.getElementById('donate-button');
+    const buttonText = document.getElementById('button-text-display');
+    const buttonLoader = document.getElementById('button-loader-display');
     const donationView = document.getElementById('donation-view');
     const paymentView = document.getElementById('payment-view');
     const successView = document.getElementById('success-view');
@@ -267,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const amountIcon = document.getElementById('amount-icon');
 
     let pollingInterval;
-    let currentMinAmount = 10; // Default to 10 USD
+    let currentMinAmount = 10;
     let isCrypto = false;
 
     amountInput.addEventListener('blur', () => {
@@ -280,8 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
     donationForm.addEventListener('submit', async function(event) {
         event.preventDefault();
 
-        actualDonateButton.disabled = true; // Disable the actual button
-        donateButtonLabel.classList.add('disabled'); // Add a class to visually indicate disabled state if needed
+        actualDonateButton.disabled = true;
+        donateButtonLabel.classList.add('disabled');
         buttonText.textContent = currentTranslations['button_creating'];
         buttonLoader.classList.remove('hidden');
 
@@ -290,20 +153,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('email').value;
         const message = document.getElementById('message').value;
 
-        let payload;
+        const payload = {
+            pay_currency: currency,
+            order_description: `Donation from ${email || 'Anonymous'}. Message: ${message || 'None'}`
+        };
+
         if (isCrypto) {
-            payload = {
-                pay_amount: parseFloat(amount),
-                pay_currency: currency,
-                order_description: `Donation from ${email || 'Anonymous'}. Message: ${message || 'None'}`
-            }
+            payload.pay_amount = parseFloat(amount);
         } else {
-            payload = {
-                price_amount: parseFloat(amount),
-                price_currency: 'usd',
-                pay_currency: currency,
-                order_description: `Donation: ${amount} USD from ${email || 'Anonymous'}. Message: ${message || 'None'}`
-            }
+            payload.price_amount = parseFloat(amount);
         }
 
         try {
@@ -431,10 +289,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 10000);
     }
 
-    backToHomeButton.addEventListener('click', () => {
-        location.reload();
-    });
-    
     function resetButton() {
         actualDonateButton.disabled = false;
         donateButtonLabel.classList.remove('disabled');
@@ -463,17 +317,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    // --- YENİ: Kripto Para Seçim Mantığı ---
     const currencyOptions = document.querySelectorAll('.currency-option');
 
-    // Function to fetch and display the minimum amount
     async function updateMinAmount() {
         const selectedCurrency = document.querySelector('input[name="currency"]:checked').value;
         const currencySymbol = document.querySelector('input[name="currency"]:checked').parentElement.querySelector('span').textContent;
 
         minAmountText.textContent = currentTranslations['min_amount_loading'];
         amountInput.disabled = true;
-        amountInput.value = ''; // Clear previous amount
+        amountInput.value = '';
 
         if (selectedCurrency === 'usdttrc20') {
             currentMinAmount = 10;
@@ -487,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         isCrypto = true;
-        amountIcon.setAttribute('data-lucide', 'coins'); // Change icon for crypto
+        amountIcon.setAttribute('data-lucide', 'coins');
         lucide.createIcons();
 
         try {
@@ -497,25 +349,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok && data.estimated_amount) {
                 let estimatedAmount = parseFloat(data.estimated_amount);
                 
-                // Round up to a reasonable number of decimal places
                 if (estimatedAmount < 1) {
-                     // For values less than 1 (like BTC), use more precision
                     currentMinAmount = Math.ceil(estimatedAmount * 100000000) / 100000000;
                 } else {
-                    // For larger values (like TRX), round up to the next whole number
                     currentMinAmount = Math.ceil(estimatedAmount);
                 }
 
                 minAmountText.textContent = currentTranslations['min_amount_format']
+                    .replace('{amount}', currentMinAmount);
+                
+                amountInput.placeholder = currentTranslations['amount_placeholder_crypto']
                     .replace('{amount}', currentMinAmount)
                     .replace('{currency}', currencySymbol);
-                
-                amountInput.placeholder = currentTranslations['min_amount_format']
-                    .replace('{amount}', currentMinAmount)
-                    .replace('{currency}', currencySymbol);
-                
-                // Set the input to the minimum value automatically
-                amountInput.value = currentMinAmount;
 
             } else {
                 minAmountText.textContent = currentTranslations['min_amount_error'];
@@ -524,13 +369,11 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error fetching min amount:', error);
             minAmountText.textContent = currentTranslations['min_amount_error'];
         } finally {
-            amountInput.disabled = false; // Re-enable input
+            amountInput.disabled = false;
         }
     }
 
-
     function handleCurrencySelection() {
-        // Önce tüm seçeneklerden 'selected' sınıfını ve onay işaretini kaldır
         currencyOptions.forEach(opt => {
             opt.classList.remove('selected');
             const indicator = opt.querySelector('.selection-indicator');
@@ -539,7 +382,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Ardından, seçili olan radyoyu bul ve ilgili etikete 'selected' sınıfını ve onay işaretini ekle
         const checkedRadio = document.querySelector('input[name="currency"]:checked');
         if (checkedRadio) {
             const selectedLabel = checkedRadio.closest('.currency-option');
@@ -547,45 +389,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectedLabel.classList.add('selected');
                 const indicator = selectedLabel.querySelector('.selection-indicator');
                 if (indicator) {
-                    // Lucide check-circle ikonu ekleniyor
                     indicator.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5 text-blue-500"></i>';
                 }
             }
         }
-        // Lucide ikonlarını yeniden oluştur
         if (window.lucide) {
             lucide.createIcons();
         }
     }
 
-    // Tüm seçeneklere tıklama dinleyicisi ekle
     currencyOptions.forEach(option => {
         option.addEventListener('click', () => {
-            // Tarayıcı, label'a tıklandığında içindeki radyoyu otomatik olarak işaretler.
-            // Sadece bu işlemden sonra görselleri güncellememiz gerekiyor.
-            // Küçük bir gecikme, 'checked' durumunun DOM'da güncellenmesini sağlar.
             setTimeout(() => {
                 handleCurrencySelection();
-                updateMinAmount(); // Update min amount when currency changes
+                updateMinAmount();
             }, 0);
         });
     });
 
-    // Sayfa yüklendiğinde başlangıç durumunu ayarla
     handleCurrencySelection();
-    updateMinAmount(); // Also update on initial load
+    updateMinAmount();
 
-    // Add event listener for the donate button label to trigger the hidden button's click
     donateButtonLabel.addEventListener('click', () => {
         if (!actualDonateButton.disabled) {
             actualDonateButton.click();
         }
     });
 
-    // Initialize I18n
     initI18n();
 
-    // Sağ tıklama menüsünü engelle
     document.addEventListener('contextmenu', (e) => {
         e.preventDefault();
     });

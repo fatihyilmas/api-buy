@@ -189,24 +189,20 @@ class handler(BaseHTTPRequestHandler):
                 payment_request_data = json.loads(post_data)
                 email = payment_request_data.get('email', 'N/A')
                 message = payment_request_data.get('message', 'N/A')
-                
-                price_amount = payment_request_data.get('price_amount', 'N/A')
-                pay_amount = payment_request_data.get('pay_amount', 'N/A')
-                pay_currency = payment_request_data.get('pay_currency', 'N/A')
+                amount = payment_request_data.get('amount', 'N/A')
+                currency = "usd" # Varsayılan para birimi
 
                 # E-posta için sahte bir NowPayments veri yapısı oluştur
                 email_payload = {
                     'payment_status': 'waiting',
                     'payment_id': 'Oluşturuluyor...',
-                    'price_amount': price_amount if price_amount else 'Kripto',
-                    'price_currency': 'usd' if price_amount else '',
-                    'pay_amount': pay_amount if pay_amount else 'Hesaplanıyor...',
-                    'pay_currency': pay_currency,
-                    'order_description': f"Donation from {email or 'Anonymous'}. Message: {message or 'None'}"
+                    'price_amount': amount,
+                    'price_currency': currency,
+                    'pay_amount': 'Hesaplanıyor...',
+                    'pay_currency': payment_request_data.get('currency', 'N/A'),
+                    'order_description': f"Donation: {amount} {currency.upper()} from {email} Message: {message}"
                 }
-                
-                subject_amount = f"{price_amount} USD" if price_amount else f"{pay_amount} {pay_currency.upper()}"
-                subject = f"Yeni Başlatılan Bağış: {subject_amount}"
+                subject = f"Yeni Başlatılan Bağış: {amount} {currency.upper()}"
                 html_body = create_html_email_body(email_payload)
                 send_notification_email(subject, html_body)
 
