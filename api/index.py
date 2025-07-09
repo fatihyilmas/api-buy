@@ -110,9 +110,9 @@ class handler(BaseHTTPRequestHandler):
             
         payment_status = data.get('payment_status')
         
-        # Sadece ödeme tamamlandığında bildirim gönder
-        if payment_status == 'finished':
-            print("Ödeme 'finished' durumunda, bildirim gönderiliyor.")
+        # Sadece belirli durumlarda bildirim gönder (test için 'waiting' eklendi)
+        if payment_status in ['finished', 'waiting']:
+            print(f"Ödeme '{payment_status}' durumunda, bildirim gönderiliyor.")
             telegram_text = format_telegram_message(data)
             sent, message = send_telegram_message(telegram_text)
             if not sent:
