@@ -8,7 +8,7 @@ import requests
 
 # --- Telegram Bildirim Fonksiyonu ---
 
-def send_telegram_message(text, payment_id=None):
+def send_telegram_message(text):
     bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
     chat_id = os.environ.get('TELEGRAM_CHAT_ID')
 
@@ -23,20 +23,6 @@ def send_telegram_message(text, payment_id=None):
         'text': text,
         'parse_mode': 'HTML'
     }
-
-    # Buton ekleme
-    if payment_id:
-        keyboard = {
-            "inline_keyboard": [
-                [
-                    {
-                        "text": "➡️ Ödemeyi Panelde Görüntüle",
-                        "url": f"https://account.nowpayments.io/payments" 
-                    }
-                ]
-            ]
-        }
-        payload['reply_markup'] = json.dumps(keyboard)
 
     try:
         response = requests.post(url, json=payload)
@@ -134,8 +120,7 @@ class handler(BaseHTTPRequestHandler):
         if payment_status in ['finished', 'waiting']:
             print(f"Ödeme '{payment_status}' durumunda, bildirim gönderiliyor.")
             telegram_text = format_telegram_message(data)
-            payment_id = data.get('payment_id')
-            sent, message = send_telegram_message(telegram_text, payment_id)
+            sent, message = send_telegram_message(telegram_text)
             if not sent:
                 print(f"Telegram message could not be sent: {message}")
         else:
