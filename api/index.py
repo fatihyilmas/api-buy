@@ -12,13 +12,6 @@ def send_telegram_message(text):
     bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
     chat_id = os.environ.get('TELEGRAM_CHAT_ID')
 
-    # --- HATA AYIKLAMA ---
-    if bot_token:
-        print(f"Kullanılan Token (ilk 5/son 5): {bot_token[:5]}...{bot_token[-5:]}")
-    if chat_id:
-        print(f"Kullanılan Chat ID: {chat_id}")
-    # --- HATA AYIKLAMA SONU ---
-
     if not all([bot_token, chat_id]):
         print("Telegram için gerekli ortam değişkenleri eksik.")
         return False, "Server configuration error for Telegram."
@@ -115,11 +108,17 @@ class handler(BaseHTTPRequestHandler):
         except Exception as e:
             return self._send_response(400, f"Bad Request: Signature verification failed. {e}", is_json=False)
             
-        # Telegram'a bildirim gönder
-        telegram_text = format_telegram_message(data)
-        sent, message = send_telegram_message(telegram_text)
-        if not sent:
-            print(f"Telegram message could not be sent: {message}")
+        payment_status = data.get('payment_status')
+        
+        # Sadece ödeme tamamlandığında bildirim gönder
+        if payment_status == 'finished':
+            print("Ödeme 'finished' durumunda, bildirim gönderiliyor.")
+            telegram_text = format_telegram_message(data)
+            sent, message = send_telegram_message(telegram_text)
+            if not sent:
+                print(f"Telegram message could not be sent: {message}")
+        else:
+            print(f"Ödeme durumu '{payment_status}', bildirim gönderilmedi.")
 
         return self._send_response(200, "Webhook received successfully.", is_json=False)
 
@@ -159,19 +158,6 @@ class handler(BaseHTTPRequestHandler):
                 return
             
             try:
-                # Anında Telegram bildirimi gönder
-                telegram_payload = {
-                    'payment_status': 'waiting',
-                    'payment_id': 'Oluşturuluyor...',
-                    'price_amount': amount,
-                    'price_currency': 'usd',
-                    'pay_amount': 'Hesaplanıyor...',
-                    'pay_currency': currency,
-                    'order_description': f"Donation: {amount} USD from {email or 'Anonymous'}. Message: {message or 'None'}"
-                }
-                telegram_text = format_telegram_message(telegram_payload)
-                send_telegram_message(telegram_text)
-
                 # Ödeme sağlayıcısı API'sine istek
                 response = api_client.post(f"{base_url}payment", json={
                     'price_amount': amount,
