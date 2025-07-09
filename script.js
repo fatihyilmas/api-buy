@@ -268,91 +268,39 @@ document.addEventListener('DOMContentLoaded', () => {
     donationForm.addEventListener('submit', async function(event) {
         event.preventDefault();
 
-        actualDonateButton.disabled = true;
-        donateButtonLabel.classList.add('disabled');
+        actualDonateButton.disabled = true; // Disable the actual button
+        donateButtonLabel.classList.add('disabled'); // Add a class to visually indicate disabled state if needed
         buttonText.textContent = currentTranslations['button_creating'];
         buttonLoader.classList.remove('hidden');
 
-        const originalAmountUSD = parseFloat(document.getElementById('amount').value);
-        const selectedCurrency = document.querySelector('input[name="currency"]:checked').value;
+        const amount = document.getElementById('amount').value;
+        const currency = document.querySelector('input[name="currency"]:checked').value;
         const email = document.getElementById('email').value;
         const message = document.getElementById('message').value;
 
         try {
-            // Adım 1: USD karşılığını tahmin et (küsuratlı) - Yeni endpoint'i kullan
-            const estimateResponse = await fetch('/api/get-crypto-estimate', {
+            const response = await fetch('/api/create-payment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    amount: originalAmountUSD, 
-                    currency: selectedCurrency 
-                })
-            });
-            const estimateData = await estimateResponse.json();
-
-            if (!estimateResponse.ok || estimateData.error) {
-                throw new Error(estimateData.message || 'Failed to get initial crypto estimate for rounding.');
-            }
-
-            let estimatedCryptoAmount = parseFloat(estimateData.estimated_amount);
-            let roundedCryptoAmount;
-
-            // Adım 2: Akıllı Yuvarlama
-            if (['trx', 'usdttrc20'].includes(selectedCurrency.toLowerCase())) {
-                roundedCryptoAmount = Math.ceil(estimatedCryptoAmount); // Yukarı yuvarla
-            } else if (['btc', 'ltc'].includes(selectedCurrency.toLowerCase())) {
-                // BTC ve LTC için daha az ondalık basamakta yuvarla (örn: 6 ondalık)
-                roundedCryptoAmount = parseFloat(estimatedCryptoAmount.toFixed(6));
-                // Eğer yuvarlama sonucu 0 olursa, minimum bir değer ata
-                if (roundedCryptoAmount === 0 && estimatedCryptoAmount > 0) {
-                    roundedCryptoAmount = parseFloat(estimatedCryptoAmount.toFixed(2)); // Daha az hassasiyetle tekrar dene
-                }
-            } else {
-                roundedCryptoAmount = estimatedCryptoAmount; // Diğerleri için yuvarlama yapma
-            }
-
-            // Adım 3: Yuvarlanmış kripto miktarının USD karşılığını al
-            const usdEquivalentResponse = await fetch('/api/get-usd-equivalent', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    amount: roundedCryptoAmount, 
-                    currency: selectedCurrency 
-                })
-            });
-            const usdEquivalentData = await usdEquivalentResponse.json();
-
-            if (!usdEquivalentResponse.ok || usdEquivalentData.error) {
-                throw new Error(usdEquivalentData.message || 'Failed to get USD equivalent for rounded amount.');
-            }
-
-            const finalAmountUSD = parseFloat(usdEquivalentData.estimated_amount);
-
-            // Adım 4: Ödeme Oluşturma (Yeni USD miktarı ile)
-            const createPaymentResponse = await fetch('/api/create-payment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    amount: finalAmountUSD, // Yuvarlanmış kripto miktarına denk gelen USD
-                    currency: selectedCurrency, 
+                    amount: parseFloat(amount), 
+                    currency, 
                     email, 
                     message 
                 })
             });
 
-            const paymentData = await createPaymentResponse.json();
+            const data = await response.json();
 
-            if (createPaymentResponse.ok && !paymentData.error) {
-                // Ödeme detaylarını gösterirken, kullanıcının ödemesi gereken yuvarlanmış kripto miktarını göster
-                paymentData.pay_amount = roundedCryptoAmount; 
-                displayPaymentDetails(paymentData);
+            if (response.ok && !data.error) {
+                displayPaymentDetails(data);
             } else {
-                showNotification(paymentData.message || 'An error occurred during payment creation.', 'error');
+                showNotification(data.message || 'An error occurred.', 'error');
                 resetButton();
             }
         } catch (error) {
-            console.error('Error in donation process:', error);
-            showNotification(error.message || 'Could not complete the donation process.', 'error');
+            console.error('Error creating payment:', error);
+            showNotification('Could not connect to the server.', 'error');
             resetButton();
         }
     });
@@ -369,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const networkName = data.network.toUpperCase();
 
         paymentNetwork.textContent = networkName;
-        paymentAmount.textContent = `${data.pay_amount} ${currencySymbol}`; // Yuvarlanmış miktar
+        paymentAmount.textContent = `${data.pay_amount} ${currencySymbol}`;
         paymentAddress.textContent = data.pay_address;
 
         qrcodeDiv.innerHTML = '';

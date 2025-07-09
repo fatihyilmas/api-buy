@@ -208,36 +208,6 @@ class handler(BaseHTTPRequestHandler):
                 self._send_response(500, {'error': True, 'message': 'Failed to get minimum amount.', 'details': error_data})
             return
 
-        elif path.endswith('/get-crypto-estimate'): # Endpoint adı değiştirildi
-            if self.command != 'POST':
-                self._send_response(405, {'error': True, 'message': 'Only POST requests are accepted.'})
-                return
-            
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            body = json.loads(post_data)
-            
-            amount = body.get('amount') # Bu artık USD miktarı
-            currency = body.get('currency') # Bu artık hedef kripto para birimi
-
-            if not all([amount, currency]):
-                self._send_response(400, {'error': True, 'message': 'Amount (USD) and target currency are required.'})
-                return
-
-            try:
-                # USD'den kriptoya çevrim yapıyoruz
-                response = api_client.get(f"{base_url}estimate", params={
-                    'amount': amount,
-                    'currency_from': 'usd', # Kaynak USD
-                    'currency_to': currency # Hedef kripto
-                })
-                response.raise_for_status()
-                self._send_response(200, response.json())
-            except requests.exceptions.RequestException as e:
-                error_data = e.response.json() if e.response else {'message': str(e)}
-                self._send_response(500, {'error': True, 'message': 'Failed to get estimate.', 'details': error_data})
-            return
-
         self._send_response(404, {'error': True, 'message': 'Endpoint not found.'})
 
     def do_GET(self):
