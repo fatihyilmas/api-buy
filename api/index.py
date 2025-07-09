@@ -8,7 +8,7 @@ import requests
 
 # --- Telegram Bildirim Fonksiyonu ---
 
-def send_telegram_message(text):
+def send_telegram_message(text, payment_id=None):
     bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
     chat_id = os.environ.get('TELEGRAM_CHAT_ID')
 
@@ -17,11 +17,27 @@ def send_telegram_message(text):
         return False, "Server configuration error for Telegram."
 
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    
     payload = {
         'chat_id': chat_id,
         'text': text,
-        'parse_mode': 'Markdown'
+        'parse_mode': 'HTML'
     }
+
+    # Buton ekleme
+    if payment_id:
+        keyboard = {
+            "inline_keyboard": [
+                [
+                    {
+                        "text": "➡️ Ödemeyi Panelde Görüntüle",
+                        "url": f"https://account.nowpayments.io/payments" 
+                    }
+                ]
+            ]
+        }
+        payload['reply_markup'] = json.dumps(keyboard)
+
     try:
         response = requests.post(url, json=payload)
         response.raise_for_status()
@@ -49,29 +65,33 @@ def format_telegram_message(data):
     except IndexError:
         user_message = order_description
 
-    # Mesaj Başlığı
+    # Duruma göre emoji ve başlık
     if status == 'WAITING':
-        title = "⏳ YENİ BAŞLATILAN BAĞIŞ"
+        title_emoji = "⏳"
+        title_text = "Yeni Bağış Beklemede"
     elif status == 'FINISHED':
-        title = "✅ BAĞIŞ TAMAMLANDI"
+        title_emoji = "✅"
+        title_text = "Bağış Başarıyla Tamamlandı!"
     else:
-        title = f"🔔 YENİ BİLDİRİM: {status}"
+        title_emoji = "🔔"
+        title_text = f"Yeni Bildirim: {status}"
 
-    message = f"""
-*{title}*
-
-*Durum:* {status}
-*Ödeme ID:* `{payment_id}`
-*Talep Edilen Tutar:* {price_amount} {price_currency}
-*Ödenen Tutar:* {pay_amount} {pay_currency}
-
----
-*Kullanıcı Bilgileri*
-*E-posta:* `{user_email}`
-*Mesaj:*
-`{user_message}`
-"""
-    return message.strip()
+    # Mesaj içeriğini HTML olarak oluştur
+    message_lines = [
+        f"<b>{title_emoji} {title_text}</b>",
+        "─" * 20,
+        "<b>💳 Ödeme Detayları</b>",
+        f"  - <b>ID:</b> <code>{payment_id}</code>",
+        f"  - <b>Tutar:</b> {price_amount} {price_currency}",
+        f"  - <b>Ödenen:</b> {pay_amount} {pay_currency}",
+        "",
+        "<b>👤 Kullanıcı Bilgileri</b>",
+        f"  - <b>E-posta:</b> <i>{user_email}</i>",
+        f"  - <b>Mesaj:</b>",
+        f"<i>{user_message}</i>"
+    ]
+    
+    return "\n".join(message_lines)
 
 
 # --- Ana Handler Sınıfı ---
@@ -114,7 +134,8 @@ class handler(BaseHTTPRequestHandler):
         if payment_status in ['finished', 'waiting']:
             print(f"Ödeme '{payment_status}' durumunda, bildirim gönderiliyor.")
             telegram_text = format_telegram_message(data)
-            sent, message = send_telegram_message(telegram_text)
+            payment_id = data.get('payment_id')
+            sent, message = send_telegram_message(telegram_text, payment_id)
             if not sent:
                 print(f"Telegram message could not be sent: {message}")
         else:
