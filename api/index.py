@@ -12,6 +12,13 @@ def send_telegram_message(text):
     bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
     chat_id = os.environ.get('TELEGRAM_CHAT_ID')
 
+    # --- HATA AYIKLAMA ---
+    if bot_token:
+        print(f"Kullanılan Token (ilk 5/son 5): {bot_token[:5]}...{bot_token[-5:]}")
+    if chat_id:
+        print(f"Kullanılan Chat ID: {chat_id}")
+    # --- HATA AYIKLAMA SONU ---
+
     if not all([bot_token, chat_id]):
         print("Telegram için gerekli ortam değişkenleri eksik.")
         return False, "Server configuration error for Telegram."
