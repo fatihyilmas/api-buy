@@ -220,7 +220,11 @@ class handler(BaseHTTPRequestHandler):
             amount = body.get('amount')
             currency = body.get('currency')
 
+            # HATA AYIKLAMA: Gelen değerleri logla
+            print(f"get-usd-equivalent: Alınan amount: {amount}, currency: {currency}")
+
             if not all([amount, currency]):
+                print("get-usd-equivalent: Amount veya currency eksik.")
                 self._send_response(400, {'error': True, 'message': 'Amount and currency are required.'})
                 return
 

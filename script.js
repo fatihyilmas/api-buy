@@ -280,14 +280,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Adım 1: USD karşılığını tahmin et (küsuratlı)
-            const estimateResponse = await fetch('/api/get-min-amount?currency_from=' + selectedCurrency, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
+            const estimateResponse = await fetch('/api/get-usd-equivalent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    amount: originalAmountUSD, 
+                    currency: selectedCurrency 
+                })
             });
             const estimateData = await estimateResponse.json();
 
             if (!estimateResponse.ok || estimateData.error) {
-                throw new Error(estimateData.message || 'Failed to get estimate for rounding.');
+                throw new Error(estimateData.message || 'Failed to get initial crypto estimate for rounding.');
             }
 
             let estimatedCryptoAmount = parseFloat(estimateData.estimated_amount);
