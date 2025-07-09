@@ -3,9 +3,25 @@ import json
 import hmac
 import hashlib
 import math
+import re
+import html
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import requests
+
+# --- Güvenlik ve Temizleme Fonksiyonu ---
+
+def sanitize_input(text, max_length):
+    """
+    HTML etiketlerini kaldırır ve metni belirtilen maksimum uzunluğa kısaltır.
+    """
+    if not text:
+        return ""
+    # Önce metni kısaltarak büyük dizeleri işlemekten kaçının
+    text = text[:max_length]
+    # HTML etiketlerini kaldır
+    clean_text = re.sub(r'<[^>]*>', '', text)
+    return clean_text
 
 # --- Yuvarlama Fonksiyonu ---
 
@@ -76,6 +92,10 @@ def format_telegram_message(data):
     except IndexError:
         user_message = order_description
 
+    # Telegram'ın HTML ayrıştırıcısı için kullanıcı tarafından sağlanan içeriği güvenli hale getir
+    safe_user_email = html.escape(user_email)
+    safe_user_message = html.escape(user_message)
+
     # Duruma göre emoji ve başlık
     if status == 'WAITING':
         title_emoji = "⏳"
@@ -97,9 +117,9 @@ def format_telegram_message(data):
         f"  - <b>Ödenen:</b> {pay_amount} {pay_currency}",
         "",
         "<b>👤 Kullanıcı Bilgileri</b>",
-        f"  - <b>E-posta:</b> <i>{user_email}</i>",
+        f"  - <b>E-posta:</b> <i>{safe_user_email}</i>",
         f"  - <b>Mesaj:</b>",
-        f"<i>{user_message}</i>"
+        f"<i>{safe_user_message}</i>"
     ]
     
     return "\n".join(message_lines)
@@ -181,8 +201,10 @@ class handler(BaseHTTPRequestHandler):
             
             amount = body.get('amount')
             currency = body.get('currency')
-            email = body.get('email')
-            message = body.get('message')
+            
+            # E-posta ve mesaj alanlarını temizle ve güvenli hale getir
+            email = sanitize_input(body.get('email'), 100)
+            message = sanitize_input(body.get('message'), 500)
 
             if not all([amount, currency]):
                 self._send_response(400, {'error': True, 'message': 'Amount and currency fields are required.'})
