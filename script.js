@@ -279,8 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const message = document.getElementById('message').value;
 
         try {
-            // Adım 1: USD karşılığını tahmin et (küsuratlı)
-            const estimateResponse = await fetch('/api/get-usd-equivalent', {
+            // Adım 1: USD karşılığını tahmin et (küsuratlı) - Yeni endpoint'i kullan
+            const estimateResponse = await fetch('/api/get-crypto-estimate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
