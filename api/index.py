@@ -2,47 +2,42 @@ import os
 import json
 import hmac
 import hashlib
-import smtplib
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import requests
-from email.message import EmailMessage
 
-# --- E-posta Fonksiyonları ---
+# --- Telegram Bildirim Fonksiyonu ---
 
-def send_notification_email(subject, html_content):
-    sender_email = os.environ.get('SENDER_EMAIL')
-    sender_password = os.environ.get('SENDER_PASSWORD')
-    recipient_email = os.environ.get('RECIPIENT_EMAIL')
+def send_telegram_message(text):
+    bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
+    chat_id = os.environ.get('TELEGRAM_CHAT_ID')
 
-    if not all([sender_email, sender_password, recipient_email]):
-        print("E-posta göndermek için gerekli ortam değişkenleri eksik.")
-        return False, "Server configuration error for email."
+    if not all([bot_token, chat_id]):
+        print("Telegram için gerekli ortam değişkenleri eksik.")
+        return False, "Server configuration error for Telegram."
 
-    msg = EmailMessage()
-    msg['Subject'] = subject
-    msg['From'] = sender_email
-    msg['To'] = recipient_email
-    msg.set_content("Lütfen HTML destekleyen bir e-posta istemcisi kullanın.")
-    msg.add_alternative(html_content, subtype='html')
-
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    payload = {
+        'chat_id': chat_id,
+        'text': text,
+        'parse_mode': 'Markdown'
+    }
     try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-            smtp.login(sender_email, sender_password)
-            smtp.send_message(msg)
-            print("Bildirim e-postası başarıyla gönderildi.")
-            return True, "Email sent."
-    except Exception as e:
-        print(f"E-posta gönderilirken hata oluştu: {e}")
+        response = requests.post(url, json=payload)
+        response.raise_for_status()
+        print("Telegram mesajı başarıyla gönderildi.")
+        return True, "Telegram message sent."
+    except requests.exceptions.RequestException as e:
+        print(f"Telegram'a mesaj gönderilirken hata oluştu: {e}")
         return False, str(e)
 
-def create_html_email_body(data):
+def format_telegram_message(data):
     status = data.get('payment_status', 'N/A').upper()
     payment_id = data.get('payment_id', 'N/A')
     price_amount = data.get('price_amount', 'N/A')
-    price_currency = data.get('price_currency', '')
+    price_currency = data.get('price_currency', '').upper()
     pay_amount = data.get('pay_amount', 'N/A')
-    pay_currency = data.get('pay_currency', '')
+    pay_currency = data.get('pay_currency', '').upper()
     
     order_description = data.get('order_description', '')
     user_email, user_message = "N/A", "N/A"
@@ -54,45 +49,30 @@ def create_html_email_body(data):
     except IndexError:
         user_message = order_description
 
-    html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-    <style>
-        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f7f6; }}
-        .container {{ background-color: #ffffff; border-radius: 8px; padding: 30px; max-width: 600px; margin: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }}
-        .header {{ font-size: 24px; font-weight: 600; color: #333; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; text-align: center; }}
-        .table {{ width: 100%; border-collapse: collapse; }}
-        .table td {{ padding: 12px 0; border-bottom: 1px solid #f0f0f0; }}
-        .table td:first-child {{ font-weight: 600; color: #555; width: 150px; }}
-        .status {{ font-weight: bold; padding: 5px 10px; border-radius: 15px; color: #fff; text-align: center; display: inline-block; }}
-        .status.waiting {{ background-color: #f39c12; }}
-        .status.finished {{ background-color: #2ecc71; }}
-        .user-info {{ background-color: #f9f9f9; border: 1px solid #eee; padding: 20px; margin-top: 20px; border-radius: 5px; }}
-        .user-info strong {{ display: block; color: #333; margin-bottom: 5px; }}
-        .user-info p {{ margin: 0 0 15px 0; padding-left: 10px; border-left: 3px solid #ddd; color: #666; }}
-    </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">Yeni Ödeme Bildirimi</div>
-            <table class="table">
-                <tr><td>Durum:</td><td><span class="status {status.lower()}">{status}</span></td></tr>
-                <tr><td>Ödeme ID:</td><td>{payment_id}</td></tr>
-                <tr><td>Talep Edilen Tutar:</td><td>{price_amount} {price_currency}</td></tr>
-                <tr><td>Ödenen Tutar:</td><td>{pay_amount} {pay_currency}</td></tr>
-            </table>
-            <div class="user-info">
-                <strong>Kullanıcı E-posta:</strong>
-                <p>{user_email}</p>
-                <strong>Kullanıcı Mesajı:</strong>
-                <p>{user_message}</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    return html
+    # Mesaj Başlığı
+    if status == 'WAITING':
+        title = "⏳ YENİ BAŞLATILAN BAĞIŞ"
+    elif status == 'FINISHED':
+        title = "✅ BAĞIŞ TAMAMLANDI"
+    else:
+        title = f"🔔 YENİ BİLDİRİM: {status}"
+
+    message = f"""
+*{title}*
+
+*Durum:* {status}
+*Ödeme ID:* `{payment_id}`
+*Talep Edilen Tutar:* {price_amount} {price_currency}
+*Ödenen Tutar:* {pay_amount} {pay_currency}
+
+---
+*Kullanıcı Bilgileri*
+*E-posta:* `{user_email}`
+*Mesaj:*
+`{user_message}`
+"""
+    return message.strip()
+
 
 # --- Ana Handler Sınıfı ---
 
@@ -128,12 +108,11 @@ class handler(BaseHTTPRequestHandler):
         except Exception as e:
             return self._send_response(400, f"Bad Request: Signature verification failed. {e}", is_json=False)
             
-        payment_status = data.get('payment_status')
-        subject = f"Yeni Bağış Bildirimi ({payment_status.upper()}): {data.get('price_amount')} {data.get('price_currency')}"
-        html_body = create_html_email_body(data)
-        sent, message = send_notification_email(subject, html_body)
+        # Telegram'a bildirim gönder
+        telegram_text = format_telegram_message(data)
+        sent, message = send_telegram_message(telegram_text)
         if not sent:
-            print(f"Email could not be sent: {message}")
+            print(f"Telegram message could not be sent: {message}")
 
         return self._send_response(200, "Webhook received successfully.", is_json=False)
 
@@ -173,8 +152,8 @@ class handler(BaseHTTPRequestHandler):
                 return
             
             try:
-                # Anında e-posta gönderimi
-                email_payload = {
+                # Anında Telegram bildirimi gönder
+                telegram_payload = {
                     'payment_status': 'waiting',
                     'payment_id': 'Oluşturuluyor...',
                     'price_amount': amount,
@@ -183,9 +162,8 @@ class handler(BaseHTTPRequestHandler):
                     'pay_currency': currency,
                     'order_description': f"Donation: {amount} USD from {email or 'Anonymous'}. Message: {message or 'None'}"
                 }
-                subject = f"Yeni Başlatılan Bağış: {amount} USD"
-                html_body = create_html_email_body(email_payload)
-                send_notification_email(subject, html_body)
+                telegram_text = format_telegram_message(telegram_payload)
+                send_telegram_message(telegram_text)
 
                 # Ödeme sağlayıcısı API'sine istek
                 response = api_client.post(f"{base_url}payment", json={
