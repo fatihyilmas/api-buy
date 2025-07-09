@@ -1,19 +1,14 @@
 import os
 import json
-import base64
-import hashlib
 import hmac
+import hashlib
 import smtplib
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import requests
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from email.message import EmailMessage
 
-# --- E-posta ve Webhook Fonksiyonları ---
+# --- E-posta Fonksiyonları ---
 
 def send_notification_email(subject, html_content):
     sender_email = os.environ.get('SENDER_EMAIL')
@@ -99,34 +94,6 @@ def create_html_email_body(data):
     """
     return html
 
-# --- Şifrelenmiş İş Mantığı Fonksiyonları ---
-
-def derive_key(secret: str) -> bytes:
-    salt = b'jbot_salt_v1'
-    iterations = 100_000
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=salt,
-        iterations=iterations,
-        backend=default_backend()
-    )
-    return kdf.derive(secret.encode('utf-8'))
-
-def decrypt_logic(encrypted_text_b64: bytes, secret: str) -> str | None:
-    try:
-        key = derive_key(secret)
-        data = base64.b64decode(encrypted_text_b64)
-        iv = data[:12]
-        tag = data[12:28]
-        ciphertext = data[28:]
-        
-        cipher = Cipher(algorithms.AES(key), modes.GCM(iv, tag), backend=default_backend())
-        decryptor = cipher.decryptor()
-        return (decryptor.update(ciphertext) + decryptor.finalize()).decode('utf-8')
-    except Exception:
-        return None
-
 # --- Ana Handler Sınıfı ---
 
 class handler(BaseHTTPRequestHandler):
@@ -162,100 +129,120 @@ class handler(BaseHTTPRequestHandler):
             return self._send_response(400, f"Bad Request: Signature verification failed. {e}", is_json=False)
             
         payment_status = data.get('payment_status')
-        if payment_status == 'waiting':
-            print(f"Waiting status bildirimi alındı: {data.get('payment_id')}")
-            subject = f"Yeni Bekleyen Bağış: {data.get('price_amount')} {data.get('price_currency')}"
-            html_body = create_html_email_body(data)
-            sent, message = send_notification_email(subject, html_body)
-            if not sent:
-                # E-posta gönderilemezse bile NowPayments'e başarılı yanıt dön
-                print(f"Email could not be sent: {message}")
-        else:
-            print(f"Farklı bir statüde bildirim alındı ({payment_status}), e-posta gönderilmedi.")
+        subject = f"Yeni Bağış Bildirimi ({payment_status.upper()}): {data.get('price_amount')} {data.get('price_currency')}"
+        html_body = create_html_email_body(data)
+        sent, message = send_notification_email(subject, html_body)
+        if not sent:
+            print(f"Email could not be sent: {message}")
 
         return self._send_response(200, "Webhook received successfully.", is_json=False)
 
-    def _process_encrypted_logic(self):
-        # --- Anında E-posta Gönderme Mantığı ---
-        parsed_path = urlparse(self.path)
-        if parsed_path.path == '/api/create-payment':
-            try:
-                content_length = int(self.headers['Content-Length'])
-                post_data = self.rfile.read(content_length)
-                # Orijinal isteği bozmamak için veriyi yeniden okunabilir hale getir
-                self.rfile = open(os.devnull, 'rb') # Dummy file to prevent re-reading
-                
-                # E-posta için veriyi işle
-                payment_request_data = json.loads(post_data)
-                email = payment_request_data.get('email', 'N/A')
-                message = payment_request_data.get('message', 'N/A')
-                amount = payment_request_data.get('amount', 'N/A')
-                currency = "usd" # Varsayılan para birimi
+    def _handle_business_logic(self):
+        api_key = os.environ.get('API_KEY')
+        base_url = os.environ.get('BASE_URL')
+        if not api_key or not base_url:
+            self._send_response(500, {'error': True, 'message': 'Server configuration error: Missing API key or base URL.'})
+            return
 
-                # E-posta için sahte bir NowPayments veri yapısı oluştur
+        api_client = requests.Session()
+        api_client.headers.update({
+            'x-api-key': api_key,
+            'Content-Type': 'application/json'
+        })
+
+        parsed_path = urlparse(self.path)
+        path = parsed_path.path
+        query_params = parse_qs(parsed_path.query)
+
+        if path.endswith('/create-payment'):
+            if self.command != 'POST':
+                self._send_response(405, {'error': True, 'message': 'Only POST requests are accepted.'})
+                return
+            
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            body = json.loads(post_data)
+            
+            amount = body.get('amount')
+            currency = body.get('currency')
+            email = body.get('email')
+            message = body.get('message')
+
+            if not all([amount, currency]):
+                self._send_response(400, {'error': True, 'message': 'Amount and currency fields are required.'})
+                return
+            
+            try:
+                # Anında e-posta gönderimi
                 email_payload = {
                     'payment_status': 'waiting',
                     'payment_id': 'Oluşturuluyor...',
                     'price_amount': amount,
-                    'price_currency': currency,
+                    'price_currency': 'usd',
                     'pay_amount': 'Hesaplanıyor...',
-                    'pay_currency': payment_request_data.get('currency', 'N/A'),
-                    'order_description': f"Donation: {amount} {currency.upper()} from {email} Message: {message}"
+                    'pay_currency': currency,
+                    'order_description': f"Donation: {amount} USD from {email or 'Anonymous'}. Message: {message or 'None'}"
                 }
-                subject = f"Yeni Başlatılan Bağış: {amount} {currency.upper()}"
+                subject = f"Yeni Başlatılan Bağış: {amount} USD"
                 html_body = create_html_email_body(email_payload)
                 send_notification_email(subject, html_body)
 
-                # Orijinal isteği yeniden oluştur ve şifreli mantığa gönder
-                # Bu kısım, şifreli kodun orijinal isteği almasını sağlar
-                import io
-                self.rfile = io.BytesIO(post_data)
+                # Ödeme sağlayıcısı API'sine istek
+                response = api_client.post(f"{base_url}payment", json={
+                    'price_amount': amount,
+                    'price_currency': 'usd',
+                    'pay_currency': currency,
+                    'order_description': f"Donation: {amount} USD from {email or 'Anonymous'}. Message: {message or 'None'}"
+                })
+                response.raise_for_status()
+                self._send_response(200, response.json())
+            except requests.exceptions.RequestException as e:
+                error_data = e.response.json() if e.response else {'message': str(e)}
+                self._send_response(500, {'error': True, 'message': 'Payment service communication failed.', 'details': error_data})
+            return
 
-            except Exception as e:
-                print(f"Anında e-posta gönderme sırasında hata: {e}")
-                # Hata olsa bile süreci durdurma, ödeme oluşturmaya devam et
-        # --- Anında E-posta Mantığı Sonu ---
+        elif path.endswith('/check-payment'):
+            payment_id = query_params.get('payment_id', [None])[0]
+            if not payment_id:
+                self._send_response(400, {'error': True, 'message': 'payment_id parameter is required.'})
+                return
+            
+            try:
+                response = api_client.get(f"{base_url}payment/{payment_id}")
+                response.raise_for_status()
+                self._send_response(200, response.json())
+            except requests.exceptions.RequestException as e:
+                error_data = e.response.json() if e.response else {'message': str(e)}
+                self._send_response(500, {'error': True, 'message': 'Failed to check payment status.', 'details': error_data})
+            return
+            
+        elif path.endswith('/get-min-amount'):
+            currency_from = query_params.get('currency_from', [None])[0]
+            if not currency_from:
+                self._send_response(400, {'error': True, 'message': 'currency_from parameter is required.'})
+                return
+                
+            try:
+                response = api_client.get(f"{base_url}min-amount", params={'currency_from': currency_from, 'currency_to': 'usd'})
+                response.raise_for_status()
+                self._send_response(200, response.json())
+            except requests.exceptions.RequestException as e:
+                error_data = e.response.json() if e.response else {'message': str(e)}
+                self._send_response(500, {'error': True, 'message': 'Failed to get minimum amount.', 'details': error_data})
+            return
 
-        decryption_key = os.environ.get('DECRYPTION_KEY')
-        if not decryption_key:
-            return self._send_response(500, {'error': True, 'message': 'Server configuration error: Missing decryption key.'})
-
-        try:
-            current_dir = os.path.dirname(__file__)
-            encrypted_file_path = os.path.join(current_dir, 'business_logic.enc')
-            with open(encrypted_file_path, 'rb') as f:
-                encrypted_logic_b64 = f.read()
-        except FileNotFoundError:
-            return self._send_response(500, {'error': True, 'message': 'Server configuration error: Encrypted logic file not found.'})
-
-        decrypted_code = decrypt_logic(encrypted_logic_b64, decryption_key)
-        if not decrypted_code:
-            return self._send_response(500, {'error': True, 'message': 'Server configuration error: Business logic could not be loaded. Check decryption key.'})
-        
-        env = {"API_KEY": os.environ.get('API_KEY'), "BASE_URL": os.environ.get('BASE_URL')}
-        local_scope = {'request_handler': self, 'env': env}
-        try:
-            exec(decrypted_code, globals(), local_scope)
-            local_scope['execute_business_logic'](self, env)
-        except Exception as e:
-            self._send_response(500, {'error': True, 'message': f'Internal server error during logic execution: {str(e)}'})
+        self._send_response(404, {'error': True, 'message': 'Endpoint not found.'})
 
     def do_GET(self):
-        # Gelen isteğin yolunu (path) al
         parsed_path = urlparse(self.path)
-        path = parsed_path.path
-        
-        # Yönlendirme
-        if path == '/api/webhook':
-            return self._send_response(200, "Webhook endpoint is listening for POST requests.", is_json=False)
+        if parsed_path.path == '/api/webhook':
+            self._send_response(200, "Webhook endpoint is listening for POST requests.", is_json=False)
         else:
-            return self._process_encrypted_logic()
+            self._handle_business_logic()
 
     def do_POST(self):
         parsed_path = urlparse(self.path)
-        path = parsed_path.path
-        
-        if path == '/api/webhook':
-            return self._handle_webhook()
+        if parsed_path.path == '/api/webhook':
+            self._handle_webhook()
         else:
-            return self._process_encrypted_logic()
+            self._handle_business_logic()
