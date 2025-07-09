@@ -208,7 +208,7 @@ class handler(BaseHTTPRequestHandler):
                 self._send_response(500, {'error': True, 'message': 'Failed to get minimum amount.', 'details': error_data})
             return
 
-        elif path.endswith('/get-usd-equivalent'):
+        elif path.endswith('/get-crypto-estimate'): # Endpoint adı değiştirildi
             if self.command != 'POST':
                 self._send_response(405, {'error': True, 'message': 'Only POST requests are accepted.'})
                 return
@@ -217,22 +217,19 @@ class handler(BaseHTTPRequestHandler):
             post_data = self.rfile.read(content_length)
             body = json.loads(post_data)
             
-            amount = body.get('amount')
-            currency = body.get('currency')
-
-            # HATA AYIKLAMA: Gelen değerleri logla
-            print(f"get-usd-equivalent: Alınan amount: {amount}, currency: {currency}")
+            amount = body.get('amount') # Bu artık USD miktarı
+            currency = body.get('currency') # Bu artık hedef kripto para birimi
 
             if not all([amount, currency]):
-                print("get-usd-equivalent: Amount veya currency eksik.")
-                self._send_response(400, {'error': True, 'message': 'Amount and currency are required.'})
+                self._send_response(400, {'error': True, 'message': 'Amount (USD) and target currency are required.'})
                 return
 
             try:
+                # USD'den kriptoya çevrim yapıyoruz
                 response = api_client.get(f"{base_url}estimate", params={
                     'amount': amount,
-                    'currency_from': currency,
-                    'currency_to': 'usd'
+                    'currency_from': 'usd', # Kaynak USD
+                    'currency_to': currency # Hedef kripto
                 })
                 response.raise_for_status()
                 self._send_response(200, response.json())
