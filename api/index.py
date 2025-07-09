@@ -2,9 +2,34 @@ import os
 import json
 import hmac
 import hashlib
+import math
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import requests
+
+# --- Yuvarlama Fonksiyonu ---
+
+def round_crypto_amount(currency, amount):
+    """
+    Kripto para birimine göre özel yuvarlama mantığı uygular.
+    """
+    try:
+        amount = float(amount)
+        if currency.lower() in ['trx', 'usdttrc20']:
+            # En yakın üst tam sayıya yuvarla
+            return math.ceil(amount)
+        elif currency.lower() == 'ltc':
+            # İki ondalık basamağa yukarı yuvarla
+            return math.ceil(amount * 100) / 100
+        elif currency.lower() == 'btc':
+            # 8 ondalık basamak hassasiyetinde yukarı yuvarla
+            return math.ceil(amount * 1e8) / 1e8
+        else:
+            # Diğerleri için varsayılan davranış
+            return amount
+    except (ValueError, TypeError):
+        return amount
+
 
 # --- Telegram Bildirim Fonksiyonu ---
 
@@ -172,7 +197,18 @@ class handler(BaseHTTPRequestHandler):
                     'order_description': f"Donation: {amount} USD from {email or 'Anonymous'}. Message: {message or 'None'}"
                 })
                 response.raise_for_status()
-                self._send_response(200, response.json())
+                
+                # NowPayments'ten gelen yanıtı al
+                payment_data = response.json()
+
+                # pay_amount değerini yuvarla
+                if 'pay_amount' in payment_data:
+                    original_amount = payment_data['pay_amount']
+                    rounded_amount = round_crypto_amount(currency, original_amount)
+                    payment_data['pay_amount'] = rounded_amount
+                    print(f"Yuvarlama: {currency} - Orijinal: {original_amount}, Yuvarlanmış: {rounded_amount}")
+
+                self._send_response(200, payment_data)
             except requests.exceptions.RequestException as e:
                 error_data = e.response.json() if e.response else {'message': str(e)}
                 self._send_response(500, {'error': True, 'message': 'Payment service communication failed.', 'details': error_data})
